@@ -18,7 +18,7 @@ body::after{content:'';position:fixed;bottom:-150px;left:-100px;width:500px;heig
 h1{font-size:clamp(26px,6vw,46px);font-weight:800;letter-spacing:-.03em;background:linear-gradient(to right,#fff 30%,#a0b0ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
 .sub{color:#555;font-size:13px}
 .tabs{display:flex;gap:8px;margin-bottom:28px;justify-content:center;flex-wrap:wrap}
-.tab{padding:9px 20px;border-radius:50px;border:1px solid var(--bord);background:var(--surf);color:#777;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s}
+.tab{padding:9px 20px;border-radius:50px;border:1px solid var(--bord);background:var(--surf);color:#777;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .tab:hover{color:#bbb}
 .tab.on{border-color:var(--g);background:rgba(55,240,160,.12);color:var(--g)}
 .panel{display:none}
@@ -34,11 +34,11 @@ h1{font-size:clamp(26px,6vw,46px);font-weight:800;letter-spacing:-.03em;backgrou
 .brs{font-size:10px;color:#555;margin-left:4px}
 .trk{height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
 .fil{height:100%;border-radius:3px}
-.sr{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.sr{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
 .spos{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
-.snm{flex:1;font-size:13px;color:#e0e0f0;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.srec{font-family:'Space Mono',monospace;font-size:11px;white-space:nowrap;margin-left:4px}
-.spt{font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:var(--g);min-width:26px;text-align:right}
+.snm{flex:1;font-size:13px;color:#e0e0f0;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.srec{font-family:'Space Mono',monospace;font-size:10px;white-space:nowrap;margin-left:2px;flex-shrink:0}
+.spt{font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:var(--g);min-width:26px;text-align:right;flex-shrink:0}
 .rb{border-radius:12px;padding:15px;margin-bottom:10px}
 .rb.gr{background:rgba(55,240,160,.06);border:1px solid rgba(55,240,160,.15)}
 .rb.rd{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.15)}
@@ -50,7 +50,42 @@ h1{font-size:clamp(26px,6vw,46px);font-weight:800;letter-spacing:-.03em;backgrou
 .al{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.08em}
 .av{font-size:13px;font-weight:600;color:#e0e0f0;margin-top:2px}
 .footer{text-align:center;margin-top:44px;padding-top:22px;border-top:1px solid rgba(255,255,255,.05);color:#333;font-size:11px;font-family:'Space Mono',monospace}
-@media(max-width:500px){.panel.on{grid-template-columns:1fr}}
+
+/* ── Mobile responsive ── */
+@media(max-width:600px){
+  .wrap{padding:0 12px 48px}
+  .header{padding:32px 0 24px}
+  h1{font-size:28px}
+  .sub{font-size:12px}
+  .badge{font-size:9px;padding:4px 12px}
+  .tabs{gap:6px;margin-bottom:20px}
+  .tab{padding:8px 14px;font-size:12px}
+  .panel.on{grid-template-columns:1fr;gap:14px}
+  .card{padding:18px 16px;border-radius:14px}
+  .ct{font-size:10px;letter-spacing:.08em}
+  .ci{font-size:18px}
+  .brl{font-size:12px;max-width:58%}
+  .brv{font-size:15px}
+  .brs{font-size:9px}
+  .trk{height:4px}
+  .snm{font-size:12px}
+  .srec{font-size:10px}
+  .spt{font-size:13px}
+  .rs{font-size:18px}
+  .rm{font-size:11px}
+  .rl{font-size:9px}
+  .ai{font-size:17px}
+  .al{font-size:9px}
+  .av{font-size:12px}
+  .rb{padding:13px}
+  .footer{font-size:10px;padding:16px 12px 0}
+}
+@media(max-width:380px){
+  h1{font-size:24px}
+  .tab{padding:7px 11px;font-size:11px}
+  .brl{max-width:54%}
+}
+
 </style>
 </head>
 <body>
@@ -59,6 +94,18 @@ h1{font-size:clamp(26px,6vw,46px);font-weight:800;letter-spacing:-.03em;backgrou
   <div class="badge">Fantasy Premier League</div>
   <h1>Punteirolos 8.0</h1>
   <p class="sub">Liga #854 · Temporada 2025/26 · 20 equipos · GWs 1–37</p>
+  <a href="https://suno.com/s/7Bau0qRrcwmSDA8h" target="_blank" rel="noopener" style="
+    display:inline-flex;align-items:center;gap:8px;margin-top:18px;
+    padding:11px 22px;border-radius:50px;
+    background:linear-gradient(135deg,rgba(55,240,160,.15),rgba(91,143,255,.15));
+    border:1px solid rgba(55,240,160,.4);
+    color:#37f0a0;font-weight:700;font-size:14px;
+    text-decoration:none;letter-spacing:.04em;
+    transition:all .2s;max-width:90vw;white-space:nowrap;
+  " onmouseover="this.style.background='linear-gradient(135deg,rgba(55,240,160,.28),rgba(91,143,255,.28))'" 
+     onmouseout="this.style.background='linear-gradient(135deg,rgba(55,240,160,.15),rgba(91,143,255,.15))'">
+    🎵 LA CANCIÓN DEL CAMPEÓN
+  </a>
 </div>
 
 <div class="tabs">
@@ -369,7 +416,7 @@ document.getElementById('biggest-win').innerHTML = `
 // ── Tight games ───────────────────────────────────────────────
 const sorted_tight = [...tightMatches].sort((a,b)=>a.diff-b.diff);
 document.getElementById('tight-games').innerHTML = `
-  <p style="font-size:12px;color:#555;margin-bottom:10px">${tightMatches.length} partidos decididos por ≤4 puntos</p>
+  <p style="font-size:12px;color:#555;margin-bottom:10px;word-break:break-word">${tightMatches.length} partidos decididos por ≤4 puntos</p>
   ${sorted_tight.slice(0,8).map(m=>`
   <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px">
     <span style="color:#dde;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.e1n} <span style="color:#37f0a0">${m.s1}</span>–<span style="color:#f87171">${m.s2}</span> ${m.e2n}</span>
