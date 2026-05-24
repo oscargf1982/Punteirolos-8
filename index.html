@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Punteirolos 8.0 — Stats</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--g:#37f0a0;--b:#5b8fff;--p:#a78bfa;--o:#fb923c;--r:#f87171;--y:#facc15;--surf:rgba(255,255,255,.04);--bord:rgba(255,255,255,.1)}
+body{min-height:100vh;background:linear-gradient(135deg,#0a0a18,#0d1b2a 50%,#0a1020);color:#e8e8f8;font-family:'Outfit',sans-serif;overflow-x:hidden}
+body::before{content:'';position:fixed;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(55,240,160,.07),transparent 70%);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;bottom:-150px;left:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(100,120,255,.06),transparent 70%);pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--g);border-radius:3px}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px 60px;position:relative;z-index:1}
+.header{text-align:center;padding:48px 0 32px}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--g),var(--b));border-radius:10px;padding:5px 14px;font-size:10px;font-family:'Space Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#000;font-weight:700;margin-bottom:14px}
+h1{font-size:clamp(26px,6vw,46px);font-weight:800;letter-spacing:-.03em;background:linear-gradient(to right,#fff 30%,#a0b0ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.sub{color:#555;font-size:13px}
+.tabs{display:flex;gap:8px;margin-bottom:28px;justify-content:center;flex-wrap:wrap}
+.tab{padding:9px 20px;border-radius:50px;border:1px solid var(--bord);background:var(--surf);color:#777;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s}
+.tab:hover{color:#bbb}
+.tab.on{border-color:var(--g);background:rgba(55,240,160,.12);color:var(--g)}
+.panel{display:none}
+.panel.on{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;padding:22px 24px;backdrop-filter:blur(10px)}
+.ch{display:flex;align-items:center;gap:9px;margin-bottom:18px}
+.ci{font-size:20px}
+.ct{font-size:12px;font-family:'Space Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#888}
+.br{margin-bottom:12px}
+.brt{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.brl{font-size:13px;color:#dde;font-weight:600;max-width:62%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brv{font-size:17px;font-weight:700;font-family:'Space Mono',monospace}
+.brs{font-size:10px;color:#555;margin-left:4px}
+.trk{height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.fil{height:100%;border-radius:3px}
+.sr{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.spos{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.snm{flex:1;font-size:13px;color:#e0e0f0;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srec{font-family:'Space Mono',monospace;font-size:11px;white-space:nowrap;margin-left:4px}
+.spt{font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:var(--g);min-width:26px;text-align:right}
+.rb{border-radius:12px;padding:15px;margin-bottom:10px}
+.rb.gr{background:rgba(55,240,160,.06);border:1px solid rgba(55,240,160,.15)}
+.rb.rd{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.15)}
+.rl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+.rs{font-size:20px;font-weight:700;font-family:'Space Mono',monospace}
+.rm{font-size:12px;color:#aaa;margin-top:3px}
+.ar{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.ai{font-size:19px}
+.al{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.08em}
+.av{font-size:13px;font-weight:600;color:#e0e0f0;margin-top:2px}
+.footer{text-align:center;margin-top:44px;padding-top:22px;border-top:1px solid rgba(255,255,255,.05);color:#333;font-size:11px;font-family:'Space Mono',monospace}
+@media(max-width:500px){.panel.on{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="header">
+  <div class="badge">Fantasy Premier League</div>
+  <h1>Punteirolos 8.0</h1>
+  <p class="sub">Liga #854 · Temporada 2025/26 · 20 equipos · GWs 1–37</p>
+</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="showTab('h2h')">⚔️ H2H</button>
+  <button class="tab" onclick="showTab('pts')">📊 Puntos</button>
+  <button class="tab" onclick="showTab('curiosidades')">🔍 Curiosidades</button>
+  <button class="tab" onclick="showTab('premios')">🏅 Premios</button>
+</div>
+
+<!-- H2H TAB -->
+<div class="panel on" id="tab-h2h">
+
+  <div class="card">
+    <div class="ch"><span class="ci">🏆</span><span class="ct">Clasificación Final</span></div>
+    <div id="standings"></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ci">😰</span><span class="ct">Victorias por ≤4 puntos</span></div>
+    <div id="close-wins"></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ci">💥</span><span class="ct">Goleadas (+20 puntos)</span></div>
+    <div id="big-wins"></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ci">💔</span><span class="ct">Derrotas por ≤4 puntos</span></div>
+    <div id="close-losses"></div>
+  </div>
+
+</div>
+
+<!-- PUNTOS TAB -->
+<div class="panel" id="tab-pts">
+
+  <div class="card">
+    <div class="ch"><span class="ci">📈</span><span class="ct">Puntos totales acumulados</span></div>
+    <div id="total-pts"></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ci">🎯</span><span class="ct">Mayor puntuación en una jornada</span></div>
+    <div id="high-score"></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ci">📉</span><span class="ct">Puntuación media por jornada</span></div>
+    <div id="avg-score"></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ci">📋</span><span class="ct">Récords absolutos</span></div>
+    <div id="records"></div>
+  </div>
+
+</div>
+
+<!-- CURIOSIDADES TAB -->
+<div class="panel" id="tab-curiosidades">
+
+  <div class="card">
+    <div class="ch"><span class="ci">🎲</span><span class="ct">% de victorias H2H</span></div>
+    <div id="win-pct"></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ci">😵</span><span class="ct">El más gafado</span></div>
+    <p style="font-size:12px;color:#555;margin-bottom:14px">Puntos marcados en partidos perdidos</p>
+    <div id="unlucky"></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ci">⚡</span><span class="ct">Diferencia de puntos (victoria más amplia)</span></div>
+    <div id="biggest-win"></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><span class="ci">🤝</span><span class="ct">Partidos más igualados (≤4 pts de diferencia)</span></div>
+    <div id="tight-games"></div>
+  </div>
+
+</div>
+
+<!-- PREMIOS TAB -->
+<div class="panel" id="tab-premios">
+  <div class="card" style="grid-column:1/-1">
+    <div class="ch"><span class="ci">🏅</span><span class="ct">Galería de premios</span></div>
+    <div id="awards"></div>
+  </div>
+</div>
+
+<div class="footer">Datos de la temporada 2025/26 · Punteirolos 8.0 · GWs 1–37 completos</div>
+</div>
+
+<script>
+const TEAMS = [
+  {e:4529023,n:"Os meninhos",p:"Roi Valcárcel",r:1,w:23,d:0,l:14,pts:2065},
+  {e:231121,n:"Abeledos Team",p:"Camilo Rodríguez",r:2,w:22,d:1,l:14,pts:2168},
+  {e:396351,n:"Liverprol FC",p:"Adrián Prol",r:3,w:21,d:3,l:13,pts:2132},
+  {e:5058364,n:"Aston Vulos",p:"Kepa Sayou",r:4,w:22,d:0,l:15,pts:2074},
+  {e:750815,n:"Rober Bielsa",p:"Rober Bielsa",r:5,w:21,d:1,l:15,pts:2075},
+  {e:3467066,n:"All Blacks",p:"Adrian Vazquez",r:6,w:21,d:0,l:16,pts:2124},
+  {e:203467,n:"Drinks Team",p:"Michi Rodriguez",r:7,w:21,d:0,l:16,pts:2068},
+  {e:4984,n:"The Admin",p:"Alberto Vázquez",r:8,w:20,d:1,l:16,pts:2113},
+  {e:491434,n:"A Penela CF",p:"David Pérez Rodríguez",r:9,w:20,d:1,l:16,pts:2021},
+  {e:769677,n:"UD Torre Pacheco",p:"Figo Dido",r:10,w:19,d:1,l:17,pts:2074},
+  {e:3280431,n:"Figo NO",p:"Marcos Pérez",r:11,w:17,d:3,l:17,pts:2016},
+  {e:682792,n:"La Conchabanza",p:"Rubén Rodríguez",r:12,w:17,d:2,l:18,pts:2130},
+  {e:727697,n:"Chaos FC",p:"Sérgio Méndez",r:13,w:17,d:2,l:18,pts:1911},
+  {e:5011123,n:"Obvelot",p:"Borja Casar",r:14,w:17,d:1,l:19,pts:1959},
+  {e:733119,n:"O Casar",p:"Alex Gonda",r:15,w:17,d:0,l:20,pts:1995},
+  {e:4184519,n:"Cobra Kai",p:"Omar López Parga",r:16,w:16,d:2,l:19,pts:1944},
+  {e:134998,n:"Jouventus de Següín",p:"Jou Vázquez",r:17,w:14,d:0,l:23,pts:1837},
+  {e:3407856,n:"Casas Baratas",p:"Roberto Varela Prada",r:18,w:13,d:2,l:22,pts:1879},
+  {e:2265068,n:"Galaicos",p:"Manuel Vázquez Rodríguez",r:19,w:12,d:0,l:25,pts:1661},
+  {e:512982,n:"Equipo Multiverso",p:"Fran López Mariño",r:20,w:10,d:0,l:27,pts:1832},
+];
+
+const MATCHES = [
+  [231121,45,682792,57,1],[4184519,51,5011123,52,1],[512982,44,396351,47,1],[134998,25,5058364,46,1],[750815,57,3280431,58,1],[769677,43,3467066,57,1],[2265068,54,3407856,21,1],[4984,54,491434,60,1],[727697,67,203467,52,1],[4529023,47,733119,55,1],
+  [682792,43,4529023,59,2],[733119,62,727697,40,2],[203467,69,4984,55,2],[491434,64,2265068,25,2],[3407856,80,769677,61,2],[3467066,41,750815,64,2],[3280431,61,134998,42,2],[5058364,50,512982,46,2],[396351,33,4184519,33,2],[5011123,40,231121,58,2],
+  [4184519,37,682792,51,3],[512982,40,231121,56,3],[134998,50,5011123,43,3],[750815,54,396351,53,3],[769677,61,5058364,36,3],[2265068,54,3280431,45,3],[4984,52,3467066,18,3],[727697,42,3407856,59,3],[4529023,41,491434,37,3],[733119,47,203467,42,3],
+  [682792,70,733119,56,4],[203467,74,4529023,69,4],[491434,62,727697,52,4],[3407856,62,4984,56,4],[3467066,69,2265068,57,4],[3280431,70,769677,43,4],[5058364,67,750815,63,4],[396351,82,134998,65,4],[5011123,63,512982,52,4],[231121,66,4184519,60,4],
+  [512982,50,682792,61,5],[134998,41,4184519,35,5],[750815,36,231121,37,5],[769677,28,5011123,47,5],[2265068,47,396351,65,5],[4984,43,5058364,60,5],[727697,49,3280431,37,5],[4529023,23,3467066,42,5],[733119,62,3407856,29,5],[203467,46,491434,38,5],
+  [682792,63,203467,25,6],[491434,57,733119,28,6],[3407856,38,4529023,30,6],[3467066,62,727697,60,6],[3280431,20,4984,61,6],[5058364,40,2265068,27,6],[396351,58,769677,70,6],[5011123,51,750815,48,6],[231121,43,134998,37,6],[4184519,62,512982,37,6],
+  [134998,41,682792,64,7],[750815,70,512982,46,7],[769677,50,4184519,73,7],[2265068,37,231121,83,7],[4984,76,5011123,65,7],[727697,49,396351,66,7],[4529023,70,5058364,64,7],[733119,69,3280431,85,7],[203467,64,3467066,76,7],[491434,58,3407856,50,7],
+  [682792,60,491434,50,8],[3407856,37,203467,56,8],[3467066,73,733119,70,8],[3280431,66,4529023,63,8],[5058364,77,727697,71,8],[396351,64,4984,62,8],[5011123,73,2265068,47,8],[231121,66,769677,52,8],[4184519,58,750815,68,8],[512982,36,134998,43,8],
+  [750815,31,682792,61,9],[769677,69,134998,59,9],[2265068,61,512982,37,9],[4984,45,4184519,53,9],[727697,37,231121,54,9],[4529023,51,5011123,34,9],[733119,44,396351,50,9],[203467,50,5058364,42,9],[491434,38,3280431,72,9],[3407856,50,3467066,58,9],
+  [682792,75,3407856,50,10],[3467066,69,491434,47,10],[3280431,66,203467,68,10],[5058364,83,733119,70,10],[396351,59,4529023,70,10],[5011123,67,727697,70,10],[231121,62,4984,68,10],[4184519,59,2265068,45,10],[512982,67,769677,95,10],[134998,60,750815,67,10],
+  [769677,31,682792,28,11],[2265068,36,750815,49,11],[4984,47,134998,29,11],[727697,68,512982,52,11],[4529023,44,4184519,45,11],[733119,33,231121,52,11],[203467,29,5011123,56,11],[491434,48,396351,47,11],[3407856,50,5058364,35,11],[3467066,42,3280431,37,11],
+  [682792,30,3467066,51,12],[3280431,45,3407856,29,12],[5058364,62,491434,35,12],[396351,41,203467,26,12],[5011123,52,733119,34,12],[231121,32,4529023,44,12],[4184519,29,727697,42,12],[512982,41,4984,46,12],[134998,34,2265068,32,12],[750815,39,769677,36,12],
+  [2265068,10,682792,38,13],[4984,43,769677,17,13],[727697,39,750815,58,13],[4529023,52,134998,31,13],[733119,25,512982,38,13],[203467,35,4184519,22,13],[491434,43,231121,40,13],[3407856,68,5011123,46,13],[3467066,37,396351,58,13],[3280431,38,5058364,43,13],
+  [682792,66,3280431,87,14],[5058364,82,3467066,79,14],[396351,67,3407856,67,14],[5011123,68,491434,62,14],[231121,71,203467,63,14],[4184519,71,733119,55,14],[512982,73,4529023,83,14],[134998,72,727697,74,14],[750815,65,4984,65,14],[769677,68,2265068,53,14],
+  [4984,67,682792,56,15],[727697,40,2265068,47,15],[4529023,53,769677,63,15],[733119,44,750815,68,15],[203467,57,134998,46,15],[491434,57,512982,51,15],[3407856,63,4184519,46,15],[3467066,72,231121,69,15],[3280431,46,5011123,46,15],[5058364,56,396351,66,15],
+  [682792,46,4529023,51,21],[733119,49,727697,52,21],[203467,47,4984,45,21],[491434,58,2265068,63,21],[3407856,56,769677,65,21],[3467066,59,750815,46,21],[3280431,46,134998,51,21],[5058364,67,512982,65,21],[396351,45,4184519,63,21],[5011123,49,231121,58,21],
+  [4184519,32,682792,32,22],[512982,38,231121,26,22],[134998,28,5011123,42,22],[750815,27,396351,35,22],[769677,28,5058364,38,22],[2265068,21,3280431,29,22],[4984,52,3467066,33,22],[727697,31,3407856,33,22],[4529023,29,491434,25,22],[733119,45,203467,36,22],
+  [682792,33,733119,43,23],[203467,37,4529023,39,23],[491434,49,727697,51,23],[3407856,44,4984,31,23],[3467066,47,2265068,21,23],[3280431,35,769677,58,23],[5058364,40,750815,54,23],[396351,38,134998,42,23],[5011123,44,512982,31,23],[231121,46,4184519,52,23],
+  [512982,40,682792,73,24],[134998,69,4184519,54,24],[750815,44,231121,53,24],[769677,54,5011123,44,24],[2265068,72,396351,45,24],[4984,72,5058364,49,24],[727697,56,3280431,50,24],[4529023,53,3467066,47,24],[733119,57,3407856,38,24],[203467,44,491434,51,24],
+  [682792,63,203467,99,25],[491434,79,733119,52,25],[3407856,57,4529023,69,25],[3467066,71,727697,75,25],[3280431,62,4984,66,25],[5058364,73,2265068,51,25],[396351,61,769677,54,25],[5011123,52,750815,60,25],[231121,83,134998,48,25],[4184519,65,512982,63,25],
+  [134998,69,682792,60,26],[750815,77,512982,68,26],[769677,73,4184519,61,26],[2265068,57,231121,62,26],[4984,70,5011123,67,26],[727697,63,396351,63,26],[4529023,47,5058364,50,26],[733119,64,3280431,68,26],[203467,70,3467066,85,26],[491434,63,3407856,62,26],
+  [682792,42,491434,42,27],[3407856,56,203467,37,27],[3467066,47,733119,49,27],[3280431,41,4529023,56,27],[5058364,45,727697,40,27],[396351,55,4984,43,27],[5011123,52,2265068,30,27],[231121,31,769677,38,27],[4184519,43,750815,40,27],[512982,44,134998,39,27],
+  [750815,42,682792,72,28],[769677,79,134998,78,28],[2265068,44,512982,41,28],[4984,75,4184519,50,28],[727697,76,231121,63,28],[4529023,45,5011123,44,28],[733119,53,396351,79,28],[203467,62,5058364,61,28],[491434,59,3280431,46,28],[3407856,80,3467066,61,28],
+  [682792,58,3407856,63,29],[3467066,80,491434,63,29],[3280431,58,203467,49,29],[5058364,68,733119,64,29],[396351,70,4529023,82,29],[5011123,83,727697,41,29],[231121,58,4984,48,29],[4184519,63,2265068,36,29],[512982,44,769677,34,29],[134998,41,750815,54,29],
+  [769677,56,682792,52,30],[2265068,37,750815,51,30],[4984,59,134998,51,30],[727697,39,512982,29,30],[4529023,69,4184519,31,30],[733119,55,231121,44,30],[203467,54,5011123,37,30],[491434,55,396351,62,30],[3407856,38,5058364,58,30],[3467066,42,3280431,53,30],
+  [682792,66,3467066,65,31],[3280431,63,3407856,63,31],[5058364,61,491434,64,31],[396351,70,203467,65,31],[5011123,30,733119,54,31],[231121,70,4529023,31,31],[4184519,35,727697,49,31],[512982,34,4984,55,31],[134998,48,2265068,20,31],[750815,58,769677,50,31],
+  [2265068,75,682792,66,32],[4984,63,769677,86,32],[727697,65,750815,60,32],[4529023,34,134998,59,32],[733119,33,512982,49,32],[203467,51,4184519,50,32],[491434,61,231121,77,32],[3407856,40,5011123,60,32],[3467066,48,396351,51,32],[3280431,42,5058364,48,32],
+  [682792,83,3280431,72,33],[5058364,71,3467066,67,33],[396351,89,3407856,83,33],[5011123,55,491434,76,33],[231121,82,203467,87,33],[4184519,81,733119,90,33],[512982,77,4529023,73,33],[134998,52,727697,58,33],[750815,84,4984,56,33],[769677,115,2265068,58,33],
+  [4984,64,682792,63,34],[727697,19,2265068,20,34],[4529023,64,769677,48,34],[733119,47,750815,23,34],[203467,32,134998,11,34],[491434,50,512982,30,34],[3407856,52,4184519,45,34],[3467066,37,231121,36,34],[3280431,30,5011123,38,34],[5058364,53,396351,60,34],
+  [682792,47,5058364,54,35],[396351,50,3280431,53,35],[5011123,42,3467066,64,35],[231121,62,3407856,44,35],[4184519,61,491434,50,35],[512982,47,203467,56,35],[134998,68,733119,77,35],[750815,68,4529023,72,35],[769677,43,727697,59,35],[2265068,43,4984,59,35],
+  // GW36
+  [727697,57,682792,95,36],[4529023,81,4984,68,36],[733119,78,2265068,68,36],[203467,101,769677,62,36],
+  [491434,74,750815,81,36],[3407856,46,134998,76,36],[3467066,81,512982,70,36],[3280431,88,4184519,95,36],
+  [5058364,81,231121,89,36],[396351,71,5011123,86,36],
+  // GW37
+  [682792,67,396351,40,37],[5011123,58,5058364,56,37],[231121,71,3280431,78,37],[4184519,52,3467066,62,37],
+  [512982,75,3407856,38,37],[134998,46,491434,65,37],[750815,71,203467,73,37],[769677,67,733119,65,37],
+  [2265068,42,4529023,81,37],[4984,59,727697,38,37],
+];
+
+// ── Compute stats ──────────────────────────────────────────────
+const st = {};
+TEAMS.forEach(t => {
+  st[t.e] = {name:t.n, player:t.p, rank:t.r, wins:t.w, draws:t.d, losses:t.l, pts:t.pts,
+    closeWins:0, bigWins:0, closeLosses:0, highScore:0, lostPts:0, total:0, avg:0};
+});
+
+let bestScore={name:'',val:0,gw:0}, worstScore={name:'',val:999,gw:0};
+let biggestWin={winner:'',loser:'',diff:0,gw:0,ws:0,ls:0};
+const tightMatches = [];
+
+MATCHES.forEach(([e1,s1,e2,s2,gw]) => {
+  const diff = Math.abs(s1-s2);
+  [[e1,s1,e2,s2],[e2,s2,e1,s1]].forEach(([me,my,them,opp]) => {
+    if (!st[me]) return;
+    st[me].total++;
+    if (my > st[me].highScore) st[me].highScore = my;
+    if (my > opp) {
+      if (diff <= 4) st[me].closeWins++;
+      if (diff >= 20) st[me].bigWins++;
+    } else if (my < opp) {
+      if (diff <= 4) st[me].closeLosses++;
+      st[me].lostPts += my;
+    }
+  });
+  // Best/worst
+  const maxS = Math.max(s1,s2), minS = Math.min(s1,s2);
+  const maxN = s1>=s2 ? (st[e1]?.name||'') : (st[e2]?.name||'');
+  const minN = s1<=s2 ? (st[e1]?.name||'') : (st[e2]?.name||'');
+  if (maxS > bestScore.val) bestScore = {name:maxN, val:maxS, gw};
+  if (minS < worstScore.val) worstScore = {name:minN, val:minS, gw};
+  // Biggest win
+  if (diff > biggestWin.diff) {
+    const w = s1>s2 ? (st[e1]?.name||'') : (st[e2]?.name||'');
+    const l = s1>s2 ? (st[e2]?.name||'') : (st[e1]?.name||'');
+    biggestWin = {winner:w, loser:l, diff, gw, ws:Math.max(s1,s2), ls:Math.min(s1,s2)};
+  }
+  // Tight
+  if (diff <= 4) tightMatches.push({e1n:st[e1]?.name||'', s1, e2n:st[e2]?.name||'', s2, diff, gw});
+});
+
+TEAMS.forEach(t => {
+  if (st[t.e].total > 0) st[t.e].avg = (t.pts / st[t.e].total).toFixed(1);
+});
+
+// ── Render helpers ─────────────────────────────────────────────
+function bar(name, val, max, color, sub='') {
+  const pct = Math.min((val/max)*100, 100);
+  return `<div class="br">
+    <div class="brt"><span class="brl" title="${name}">${name}</span>
+    <div><span class="brv" style="color:${color}">${val}</span>${sub?`<span class="brs">${sub}</span>`:''}</div></div>
+    <div class="trk"><div class="fil" style="width:${pct}%;background:${color}"></div></div>
+  </div>`;
+}
+
+function sortedBy(key, asc=false) {
+  return [...TEAMS].sort((a,b) => asc ? st[a.e][key]-st[b.e][key] : st[b.e][key]-st[a.e][key]);
+}
+
+// ── Standings ──────────────────────────────────────────────────
+const medals = ['#ffd700','#c0c0c0','#cd7f32'];
+document.getElementById('standings').innerHTML = TEAMS.map((t,i) => `
+  <div class="sr">
+    <div class="spos" style="background:${medals[i]||'rgba(255,255,255,.08)'};color:${i<3?'#000':'#777'}">${i+1}</div>
+    <span class="snm" title="${t.n}">${t.n}</span>
+    <span class="srec"><span style="color:#4ade80">${t.w}V</span> <span style="color:#facc15">${t.d}E</span> <span style="color:#f87171">${t.l}D</span></span>
+    <span class="spt">${t.pts}</span>
+  </div>`).join('');
+
+// ── Close wins ─────────────────────────────────────────────────
+const cwMax = Math.max(...TEAMS.map(t=>st[t.e].closeWins),1);
+document.getElementById('close-wins').innerHTML = sortedBy('closeWins').map(t=>
+  bar(t.n, st[t.e].closeWins, cwMax, '#facc15', 'partidos')).join('');
+
+// ── Big wins ───────────────────────────────────────────────────
+const bwMax = Math.max(...TEAMS.map(t=>st[t.e].bigWins),1);
+document.getElementById('big-wins').innerHTML = sortedBy('bigWins').map(t=>
+  bar(t.n, st[t.e].bigWins, bwMax, '#37f0a0', 'palizas')).join('');
+
+// ── Close losses ───────────────────────────────────────────────
+const clMax = Math.max(...TEAMS.map(t=>st[t.e].closeLosses),1);
+document.getElementById('close-losses').innerHTML = sortedBy('closeLosses').map(t=>
+  bar(t.n, st[t.e].closeLosses, clMax, '#f87171', 'partidos')).join('');
+
+// ── Total pts ─────────────────────────────────────────────────
+const ptMax = Math.max(...TEAMS.map(t=>t.pts));
+document.getElementById('total-pts').innerHTML = sortedBy('pts').map(t=>
+  bar(t.n, t.pts, ptMax, '#5b8fff', 'pts')).join('');
+
+// ── High score ────────────────────────────────────────────────
+const hsMax = Math.max(...TEAMS.map(t=>st[t.e].highScore),1);
+document.getElementById('high-score').innerHTML = sortedBy('highScore').map(t=>
+  bar(t.n, st[t.e].highScore, hsMax, '#37f0a0', 'pts')).join('');
+
+// ── Avg score ─────────────────────────────────────────────────
+const avMax = Math.max(...TEAMS.map(t=>parseFloat(st[t.e].avg)),1);
+document.getElementById('avg-score').innerHTML = [...TEAMS].sort((a,b)=>parseFloat(st[b.e].avg)-parseFloat(st[a.e].avg)).map(t=>
+  bar(t.n, st[t.e].avg, avMax, '#a78bfa', 'pts/GW')).join('');
+
+// ── Records ───────────────────────────────────────────────────
+document.getElementById('records').innerHTML = `
+  <div class="rb gr">
+    <div class="rl" style="color:var(--g)">🏅 Mayor puntuación en una jornada</div>
+    <div class="rs" style="color:var(--g)">${bestScore.val} pts</div>
+    <div class="rm">${bestScore.name} · GW ${bestScore.gw}</div>
+  </div>
+  <div class="rb rd">
+    <div class="rl" style="color:var(--r)">😬 Menor puntuación en una jornada</div>
+    <div class="rs" style="color:var(--r)">${worstScore.val} pts</div>
+    <div class="rm">${worstScore.name} · GW ${worstScore.gw}</div>
+  </div>`;
+
+// ── Win % ────────────────────────────────────────────────────
+const wpArr = [...TEAMS].sort((a,b) => {
+  const wa = a.w/(a.w+a.d+a.l), wb = b.w/(b.w+b.d+b.l);
+  return wb - wa;
+});
+document.getElementById('win-pct').innerHTML = wpArr.map((t,i) => {
+  const pct = Math.round(t.w/(t.w+t.d+t.l)*100);
+  return bar(t.n, pct+'%', 100, i===0?'#37f0a0':'#5b8fff');
+}).join('');
+
+// ── Unlucky ───────────────────────────────────────────────────
+const ulMax = Math.max(...TEAMS.map(t=>st[t.e].lostPts),1);
+document.getElementById('unlucky').innerHTML = sortedBy('lostPts').slice(0,10).map(t=>
+  bar(t.n, st[t.e].lostPts, ulMax, '#fb923c', 'pts en derrotas')).join('');
+
+// ── Biggest win ───────────────────────────────────────────────
+document.getElementById('biggest-win').innerHTML = `
+  <div class="rb" style="background:rgba(55,240,160,.05);border:1px solid rgba(55,240,160,.12);margin-bottom:14px">
+    <div class="rl" style="color:var(--g)">💥 Victoria más amplia de la temporada</div>
+    <div class="rs" style="color:var(--g)">+${biggestWin.diff} pts · GW ${biggestWin.gw}</div>
+    <div class="rm">${biggestWin.winner} <span style="color:#37f0a0">${biggestWin.ws}</span> — <span style="color:#f87171">${biggestWin.ls}</span> ${biggestWin.loser}</div>
+  </div>
+  <p style="font-size:12px;color:#555;margin-bottom:10px">Top victorias más amplias:</p>
+  ${[...MATCHES].sort((a,b)=>Math.abs(b[1]-b[3])-Math.abs(a[1]-a[3])).slice(0,5).map(([e1,s1,e2,s2,gw])=>{
+    const diff=Math.abs(s1-s2);
+    const wn=s1>s2?(st[e1]?.name||''):(st[e2]?.name||'');
+    const ln=s1>s2?(st[e2]?.name||''):(st[e1]?.name||'');
+    const ws=Math.max(s1,s2), ls=Math.min(s1,s2);
+    return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px">
+      <span style="color:#dde">${wn} vs ${ln}</span>
+      <span style="font-family:'Space Mono',monospace;color:#37f0a0">+${diff} (GW${gw})</span>
+    </div>`;
+  }).join('')}`;
+
+// ── Tight games ───────────────────────────────────────────────
+const sorted_tight = [...tightMatches].sort((a,b)=>a.diff-b.diff);
+document.getElementById('tight-games').innerHTML = `
+  <p style="font-size:12px;color:#555;margin-bottom:10px">${tightMatches.length} partidos decididos por ≤4 puntos</p>
+  ${sorted_tight.slice(0,8).map(m=>`
+  <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px">
+    <span style="color:#dde;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.e1n} <span style="color:#37f0a0">${m.s1}</span>–<span style="color:#f87171">${m.s2}</span> ${m.e2n}</span>
+    <span style="font-family:'Space Mono',monospace;color:#facc15">±${m.diff} GW${m.gw}</span>
+  </div>`).join('')}`;
+
+// ── Awards ───────────────────────────────────────────────────
+const sorted_cw = sortedBy('closeWins');
+const sorted_bw = sortedBy('bigWins');
+const sorted_cl = sortedBy('closeLosses');
+const sorted_hs = sortedBy('highScore');
+const sorted_ul = sortedBy('lostPts');
+const sorted_av = [...TEAMS].sort((a,b)=>parseFloat(st[b.e].avg)-parseFloat(st[a.e].avg));
+
+const awards = [
+  {i:'🥇', l:'Campeón de la liga', v:TEAMS[0].n, sub:`${TEAMS[0].w}V ${TEAMS[0].d}E ${TEAMS[0].l}D · ${TEAMS[0].pts} pts`},
+  {i:'💀', l:'Farolillo rojo', v:TEAMS[19].n, sub:`${TEAMS[19].w}V ${TEAMS[19].d}E ${TEAMS[19].l}D · ${TEAMS[19].pts} pts`},
+  {i:'😰', l:'Rey del susto (más victorias ajustadas)', v:sorted_cw[0].n, sub:`${st[sorted_cw[0].e].closeWins} victorias por ≤4 pts`},
+  {i:'💥', l:'Rey de las palizas', v:sorted_bw[0].n, sub:`${st[sorted_bw[0].e].bigWins} victorias por +20 pts`},
+  {i:'💔', l:'El más desafortunado (más derrotas ajustadas)', v:sorted_cl[0].n, sub:`${st[sorted_cl[0].e].closeLosses} derrotas por ≤4 pts`},
+  {i:'🎯', l:'Mayor puntuación en una sola jornada', v:sorted_hs[0].n, sub:`${st[sorted_hs[0].e].highScore} pts`},
+  {i:'🏅', l:'Mejor promedio de puntos por jornada', v:sorted_av[0].n, sub:`${st[sorted_av[0].e].avg} pts/GW`},
+  {i:'😵', l:'El más gafado (más pts en derrotas)', v:sorted_ul[0].n, sub:`${st[sorted_ul[0].e].lostPts} pts acumulados perdiendo`},
+  {i:'⚡', l:'Victoria más amplia de la temporada', v:biggestWin.winner, sub:`+${biggestWin.diff} pts vs ${biggestWin.loser} (GW${biggestWin.gw})`},
+  {i:'📊', l:'Mayor acumulado de puntos', v:[...TEAMS].sort((a,b)=>b.pts-a.pts)[0].n, sub:`${[...TEAMS].sort((a,b)=>b.pts-a.pts)[0].pts} pts totales`},
+];
+document.getElementById('awards').innerHTML = awards.map(a=>`
+  <div class="ar">
+    <span class="ai">${a.i}</span>
+    <div style="flex:1">
+      <div class="al">${a.l}</div>
+      <div class="av">${a.v}</div>
+      <div style="font-size:11px;color:#555;margin-top:1px">${a.sub}</div>
+    </div>
+  </div>`).join('');
+
+// ── Tab switching ─────────────────────────────────────────────
+function showTab(id) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('tab-'+id).classList.add('on');
+  event.target.classList.add('on');
+}
+</script>
+</body>
+</html>
