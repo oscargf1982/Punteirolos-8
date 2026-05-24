@@ -5,225 +5,343 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Punteirolos 8.0 — Stats</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--g:#37f0a0;--b:#5b8fff;--p:#a78bfa;--o:#fb923c;--r:#f87171;--y:#facc15;--surf:rgba(255,255,255,.04);--bord:rgba(255,255,255,.1)}
+:root{
+  --g:#37f0a0;--b:#5b8fff;--p:#a78bfa;--o:#fb923c;--r:#f87171;--y:#facc15;
+  --surf:rgba(255,255,255,.04);--bord:rgba(255,255,255,.1);
+  --h2h-accent:#f87171;--pts-accent:#5b8fff;--cur-accent:#a78bfa;--award-accent:#facc15;
+}
 body{min-height:100vh;background:linear-gradient(135deg,#0a0a18,#0d1b2a 50%,#0a1020);color:#e8e8f8;font-family:'Outfit',sans-serif;overflow-x:hidden}
 body::before{content:'';position:fixed;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(55,240,160,.07),transparent 70%);pointer-events:none;z-index:0}
 body::after{content:'';position:fixed;bottom:-150px;left:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(100,120,255,.06),transparent 70%);pointer-events:none;z-index:0}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--g);border-radius:3px}
+
+/* Layout */
 .wrap{max-width:980px;margin:0 auto;padding:0 16px 60px;position:relative;z-index:1}
-.header{text-align:center;padding:48px 0 32px}
+.header{text-align:center;padding:44px 0 28px}
 .badge{display:inline-block;background:linear-gradient(135deg,var(--g),var(--b));border-radius:10px;padding:5px 14px;font-size:10px;font-family:'Space Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:#000;font-weight:700;margin-bottom:14px}
 h1{font-size:clamp(26px,6vw,46px);font-weight:800;letter-spacing:-.03em;background:linear-gradient(to right,#fff 30%,#a0b0ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
 .sub{color:#555;font-size:13px}
-.tabs{display:flex;gap:8px;margin-bottom:28px;justify-content:center;flex-wrap:wrap}
-.tab{padding:9px 20px;border-radius:50px;border:1px solid var(--bord);background:var(--surf);color:#777;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-.tab:hover{color:#bbb}
+.song-btn{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:11px 22px;border-radius:50px;background:linear-gradient(135deg,rgba(55,240,160,.15),rgba(91,143,255,.15));border:1px solid rgba(55,240,160,.4);color:#37f0a0;font-weight:700;font-size:14px;text-decoration:none;letter-spacing:.04em;transition:all .25s;-webkit-tap-highlight-color:transparent}
+.song-btn:hover{background:linear-gradient(135deg,rgba(55,240,160,.28),rgba(91,143,255,.28));transform:translateY(-2px)}
+
+/* Tabs */
+.tabs{display:flex;gap:6px;margin-bottom:24px;justify-content:center;flex-wrap:wrap}
+.tab{padding:9px 18px;border-radius:50px;border:1px solid var(--bord);background:var(--surf);color:#777;font-size:12px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;white-space:nowrap}
+.tab:hover{color:#bbb;transform:translateY(-1px)}
 .tab.on{border-color:var(--g);background:rgba(55,240,160,.12);color:var(--g)}
-.panel{display:none}
-.panel.on{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
-.card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;padding:22px 24px;backdrop-filter:blur(10px)}
-.ch{display:flex;align-items:center;gap:9px;margin-bottom:18px}
+.tab[data-tab="h2h"].on{border-color:var(--h2h-accent);background:rgba(248,113,113,.1);color:var(--h2h-accent)}
+.tab[data-tab="pts"].on{border-color:var(--pts-accent);background:rgba(91,143,255,.1);color:var(--pts-accent)}
+.tab[data-tab="avanzado"].on{border-color:var(--cur-accent);background:rgba(167,139,250,.1);color:var(--cur-accent)}
+.tab[data-tab="narrative"].on{border-color:var(--y);background:rgba(250,204,21,.1);color:var(--y)}
+.tab[data-tab="premios"].on{border-color:var(--award-accent);background:rgba(250,204,21,.1);color:var(--award-accent)}
+
+/* Panel grid */
+.panel{display:none;animation:fadeIn .3s ease}
+.panel.on{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.panel.full.on{grid-template-columns:1fr}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Cards */
+.card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;padding:20px 22px;backdrop-filter:blur(10px);transition:transform .2s}
+.card:hover{transform:translateY(-2px)}
+.card.full{grid-column:1/-1}
+.card.gold{border-color:rgba(255,215,0,.3);background:rgba(255,215,0,.04)}
+.card.silver{border-color:rgba(192,192,192,.3);background:rgba(192,192,192,.04)}
+.card.bronze{border-color:rgba(205,127,50,.3);background:rgba(205,127,50,.04)}
+.ch{display:flex;align-items:center;gap:9px;margin-bottom:16px}
 .ci{font-size:20px}
-.ct{font-size:12px;font-family:'Space Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#888}
-.br{margin-bottom:12px}
+.ct{font-size:11px;font-family:'Space Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#777}
+
+/* Bar rows */
+.br{margin-bottom:11px;animation:growBar .6s ease both}
+@keyframes growBar{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
 .brt{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
 .brl{font-size:13px;color:#dde;font-weight:600;max-width:62%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.brv{font-size:17px;font-weight:700;font-family:'Space Mono',monospace}
-.brs{font-size:10px;color:#555;margin-left:4px}
+.brv{font-size:16px;font-weight:700;font-family:'Space Mono',monospace}
+.brs{font-size:10px;color:#555;margin-left:3px}
 .trk{height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
-.fil{height:100%;border-radius:3px}
-.sr{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
-.spos{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
-.snm{flex:1;font-size:13px;color:#e0e0f0;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.srec{font-family:'Space Mono',monospace;font-size:10px;white-space:nowrap;margin-left:2px;flex-shrink:0}
-.spt{font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:var(--g);min-width:26px;text-align:right;flex-shrink:0}
-.rb{border-radius:12px;padding:15px;margin-bottom:10px}
+.fil{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+
+/* Standings */
+.podium{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px}
+.pod{border-radius:14px;padding:14px 10px;text-align:center;transition:transform .2s}
+.pod:hover{transform:translateY(-3px)}
+.pod-1{background:linear-gradient(135deg,rgba(255,215,0,.18),rgba(255,215,0,.06));border:1px solid rgba(255,215,0,.4)}
+.pod-2{background:linear-gradient(135deg,rgba(192,192,192,.14),rgba(192,192,192,.04));border:1px solid rgba(192,192,192,.3)}
+.pod-3{background:linear-gradient(135deg,rgba(205,127,50,.14),rgba(205,127,50,.04));border:1px solid rgba(205,127,50,.3)}
+.pod-medal{font-size:26px;margin-bottom:4px}
+.pod-name{font-size:11px;font-weight:700;color:#eee;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pod-player{font-size:10px;color:#666;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pod-pts{font-size:18px;font-weight:800;font-family:'Space Mono',monospace;margin-top:6px}
+.pod-rec{font-size:10px;color:#777;margin-top:2px}
+.sr{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.spos{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;background:rgba(255,255,255,.08);color:#666}
+.snm{flex:1;font-size:12px;color:#dde;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.srec{font-family:'Space Mono',monospace;font-size:10px;white-space:nowrap;flex-shrink:0;color:#666}
+.spt{font-family:'Space Mono',monospace;font-weight:700;font-size:13px;color:var(--g);min-width:26px;text-align:right;flex-shrink:0}
+
+/* Record boxes */
+.rb{border-radius:12px;padding:14px;margin-bottom:10px}
 .rb.gr{background:rgba(55,240,160,.06);border:1px solid rgba(55,240,160,.15)}
 .rb.rd{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.15)}
-.rl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
-.rs{font-size:20px;font-weight:700;font-family:'Space Mono',monospace}
-.rm{font-size:12px;color:#aaa;margin-top:3px}
-.ar{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)}
-.ai{font-size:19px}
-.al{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.08em}
-.av{font-size:13px;font-weight:600;color:#e0e0f0;margin-top:2px}
-.footer{text-align:center;margin-top:44px;padding-top:22px;border-top:1px solid rgba(255,255,255,.05);color:#333;font-size:11px;font-family:'Space Mono',monospace}
+.rb.bl{background:rgba(91,143,255,.06);border:1px solid rgba(91,143,255,.15)}
+.rb.yl{background:rgba(250,204,21,.06);border:1px solid rgba(250,204,21,.15)}
+.rl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.rs{font-size:19px;font-weight:700;font-family:'Space Mono',monospace}
+.rm{font-size:11px;color:#aaa;margin-top:3px}
 
-/* ── Mobile responsive ── */
+/* Awards */
+.ar{display:flex;align-items:flex-start;gap:11px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.ai{font-size:22px;flex-shrink:0;margin-top:1px}
+.al{font-size:9px;color:#555;text-transform:uppercase;letter-spacing:.08em}
+.av{font-size:13px;font-weight:700;color:#e0e0f0;margin-top:2px}
+.asub{font-size:11px;color:#555;margin-top:1px}
+
+/* Narrative */
+.narr-section{margin-bottom:20px}
+.narr-title{font-size:13px;font-family:'Space Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.headline{background:var(--surf);border:1px solid var(--bord);border-radius:12px;padding:14px 16px;margin-bottom:10px;border-left:3px solid var(--g);transition:transform .2s}
+.headline:hover{transform:translateX(3px)}
+.hl-emoji{font-size:18px;margin-right:8px}
+.hl-text{font-size:13px;color:#dde;line-height:1.5}
+.hl-text strong{color:#fff}
+.narr-summary{font-size:14px;color:#bbb;line-height:1.8;padding:18px;background:rgba(255,255,255,.03);border-radius:14px;border:1px solid rgba(255,255,255,.07)}
+.narr-summary p{margin-bottom:12px}
+.narr-summary p:last-child{margin-bottom:0}
+
+/* Comparador */
+.cmp-selects{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.cmp-select{background:rgba(255,255,255,.06);border:1px solid var(--bord);border-radius:10px;padding:10px 14px;color:#dde;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;width:100%;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' fill='none' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.cmp-result{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.cmp-stat-name{grid-column:2;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.08em;text-align:center;font-family:'Space Mono',monospace}
+.cmp-val{font-size:17px;font-weight:700;font-family:'Space Mono',monospace;text-align:center}
+.cmp-val.win{color:var(--g)}
+.cmp-val.lose{color:#444}
+.h2h-history{margin-top:14px}
+.h2h-match{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+
+/* Advanced stats */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.stat-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;text-align:center}
+.stat-box-val{font-size:20px;font-weight:800;font-family:'Space Mono',monospace;color:var(--g)}
+.stat-box-lbl{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+
+/* Racha badge */
+.racha-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.racha-name{flex:1;font-size:13px;color:#dde;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.racha-badge{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;padding:3px 10px;border-radius:20px;flex-shrink:0}
+.racha-badge.win{background:rgba(55,240,160,.12);color:#37f0a0;border:1px solid rgba(55,240,160,.2)}
+.racha-badge.lose{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.2)}
+.racha-badge.chaos{background:rgba(251,146,60,.12);color:#fb923c;border:1px solid rgba(251,146,60,.2)}
+
+/* Chart */
+.chart-wrap{position:relative;height:280px;margin-top:8px}
+
+/* Mobile */
 @media(max-width:600px){
-  .wrap{padding:0 12px 48px}
-  .header{padding:32px 0 24px}
-  h1{font-size:28px}
-  .sub{font-size:12px}
-  .badge{font-size:9px;padding:4px 12px}
-  .tabs{gap:6px;margin-bottom:20px}
-  .tab{padding:8px 14px;font-size:12px}
-  .panel.on{grid-template-columns:1fr;gap:14px}
-  .card{padding:18px 16px;border-radius:14px}
-  .ct{font-size:10px;letter-spacing:.08em}
-  .ci{font-size:18px}
-  .brl{font-size:12px;max-width:58%}
-  .brv{font-size:15px}
-  .brs{font-size:9px}
-  .trk{height:4px}
-  .snm{font-size:12px}
-  .srec{font-size:10px}
-  .spt{font-size:13px}
-  .rs{font-size:18px}
-  .rm{font-size:11px}
-  .rl{font-size:9px}
-  .ai{font-size:17px}
-  .al{font-size:9px}
-  .av{font-size:12px}
-  .rb{padding:13px}
-  .footer{font-size:10px;padding:16px 12px 0}
+  .wrap{padding:0 11px 44px}
+  .header{padding:28px 0 20px}
+  h1{font-size:26px}
+  .sub,.badge{font-size:11px}
+  .song-btn{font-size:12px;padding:9px 16px}
+  .tabs{gap:5px;margin-bottom:18px}
+  .tab{padding:7px 12px;font-size:11px}
+  .panel.on{grid-template-columns:1fr;gap:12px}
+  .card{padding:16px 14px;border-radius:13px}
+  .card:hover{transform:none}
+  .podium{gap:7px}
+  .pod-medal{font-size:22px}
+  .pod-name{font-size:10px}
+  .pod-pts{font-size:16px}
+  .brl{font-size:12px;max-width:56%}
+  .brv{font-size:14px}
+  .cmp-selects{grid-template-columns:1fr 1fr}
+  .cmp-val{font-size:14px}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .chart-wrap{height:220px}
+  .narr-summary{font-size:13px;padding:14px}
 }
 @media(max-width:380px){
-  h1{font-size:24px}
-  .tab{padding:7px 11px;font-size:11px}
-  .brl{max-width:54%}
+  .tab{padding:6px 10px;font-size:10px}
+  .podium{grid-template-columns:1fr 1fr 1fr}
+  .pod-medal{font-size:18px}
 }
-
 </style>
 </head>
 <body>
 <div class="wrap">
+
+<!-- HEADER -->
 <div class="header">
   <div class="badge">Fantasy Premier League</div>
   <h1>Punteirolos 8.0</h1>
-  <p class="sub">Liga #854 · Temporada 2025/26 · 20 equipos · GWs 1–37</p>
-  <a href="https://suno.com/s/7Bau0qRrcwmSDA8h" target="_blank" rel="noopener" style="
-    display:inline-flex;align-items:center;gap:8px;margin-top:18px;
-    padding:11px 22px;border-radius:50px;
-    background:linear-gradient(135deg,rgba(55,240,160,.15),rgba(91,143,255,.15));
-    border:1px solid rgba(55,240,160,.4);
-    color:#37f0a0;font-weight:700;font-size:14px;
-    text-decoration:none;letter-spacing:.04em;
-    transition:all .2s;max-width:90vw;white-space:nowrap;
-  " onmouseover="this.style.background='linear-gradient(135deg,rgba(55,240,160,.28),rgba(91,143,255,.28))'" 
-     onmouseout="this.style.background='linear-gradient(135deg,rgba(55,240,160,.15),rgba(91,143,255,.15))'">
-    🎵 LA CANCIÓN DEL CAMPEÓN
-  </a>
+  <p class="sub">Liga #854 · Temporada 2025/26 · 20 equipos · GWs 1–38</p>
+  <a class="song-btn" href="https://suno.com/s/7Bau0qRrcwmSDA8h" target="_blank" rel="noopener">🎵 LA CANCIÓN DEL CAMPEÓN</a>
 </div>
 
+<!-- TABS -->
 <div class="tabs">
-  <button class="tab on" onclick="showTab('h2h')">⚔️ H2H</button>
-  <button class="tab" onclick="showTab('pts')">📊 Puntos</button>
-  <button class="tab" onclick="showTab('curiosidades')">🔍 Curiosidades</button>
-  <button class="tab" onclick="showTab('premios')">🏅 Premios</button>
+  <button class="tab on" data-tab="h2h">⚔️ H2H</button>
+  <button class="tab" data-tab="pts">📊 Puntos</button>
+  <button class="tab" data-tab="avanzado">🧠 Avanzado</button>
+  <button class="tab" data-tab="grafico">📈 Evolución</button>
+  <button class="tab" data-tab="comparador">🆚 Comparar</button>
+  <button class="tab" data-tab="narrative">📰 Narrativa</button>
+  <button class="tab" data-tab="premios">🏅 Premios</button>
 </div>
 
-<!-- H2H TAB -->
+<!-- H2H -->
 <div class="panel on" id="tab-h2h">
-
-  <div class="card">
-    <div class="ch"><span class="ci">🏆</span><span class="ct">Clasificación Final</span></div>
+  <div class="card full">
+    <div class="ch"><span class="ci">🏆</span><span class="ct">Podio de la temporada</span></div>
+    <div class="podium" id="podium"></div>
     <div id="standings"></div>
   </div>
-
   <div class="card">
     <div class="ch"><span class="ci">😰</span><span class="ct">Victorias por ≤4 puntos</span></div>
     <div id="close-wins"></div>
   </div>
-
   <div class="card">
     <div class="ch"><span class="ci">💥</span><span class="ct">Goleadas (+20 puntos)</span></div>
     <div id="big-wins"></div>
   </div>
-
   <div class="card">
     <div class="ch"><span class="ci">💔</span><span class="ct">Derrotas por ≤4 puntos</span></div>
     <div id="close-losses"></div>
   </div>
-
 </div>
 
-<!-- PUNTOS TAB -->
+<!-- PUNTOS -->
 <div class="panel" id="tab-pts">
-
   <div class="card">
     <div class="ch"><span class="ci">📈</span><span class="ct">Puntos totales acumulados</span></div>
     <div id="total-pts"></div>
   </div>
-
   <div class="card">
     <div class="ch"><span class="ci">🎯</span><span class="ct">Mayor puntuación en una jornada</span></div>
     <div id="high-score"></div>
   </div>
-
   <div class="card">
-    <div class="ch"><span class="ci">📉</span><span class="ct">Puntuación media por jornada</span></div>
+    <div class="ch"><span class="ci">📉</span><span class="ct">Promedio por jornada</span></div>
     <div id="avg-score"></div>
   </div>
-
   <div class="card">
     <div class="ch"><span class="ci">📋</span><span class="ct">Récords absolutos</span></div>
     <div id="records"></div>
   </div>
-
 </div>
 
-<!-- CURIOSIDADES TAB -->
-<div class="panel" id="tab-curiosidades">
-
+<!-- AVANZADO -->
+<div class="panel" id="tab-avanzado">
+  <div class="card">
+    <div class="ch"><span class="ci">🔥</span><span class="ct">Mejor racha de victorias</span></div>
+    <div id="best-streak"></div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ci">❄️</span><span class="ct">Peor racha de derrotas</span></div>
+    <div id="worst-streak"></div>
+  </div>
   <div class="card">
     <div class="ch"><span class="ci">🎲</span><span class="ct">% de victorias H2H</span></div>
     <div id="win-pct"></div>
   </div>
-
   <div class="card">
-    <div class="ch"><span class="ci">😵</span><span class="ct">El más gafado</span></div>
-    <p style="font-size:12px;color:#555;margin-bottom:14px">Puntos marcados en partidos perdidos</p>
+    <div class="ch"><span class="ci">🌪️</span><span class="ct">Equipos más caóticos (desviación típica)</span></div>
+    <div id="chaos"></div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ci">🎯</span><span class="ct">Consistencia (menor desviación)</span></div>
+    <div id="consistent"></div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ci">🍀</span><span class="ct">Índice de suerte — victorias con menos pts que rival</span></div>
+    <div id="luck"></div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ci">💪</span><span class="ct">Power Ranking (fuerza real)</span></div>
+    <div id="power"></div>
+  </div>
+  <div class="card">
+    <div class="ch"><span class="ci">😵</span><span class="ct">El más gafado (pts en derrotas)</span></div>
     <div id="unlucky"></div>
   </div>
-
-  <div class="card">
-    <div class="ch"><span class="ci">⚡</span><span class="ct">Diferencia de puntos (victoria más amplia)</span></div>
-    <div id="biggest-win"></div>
-  </div>
-
-  <div class="card">
-    <div class="ch"><span class="ci">🤝</span><span class="ct">Partidos más igualados (≤4 pts de diferencia)</span></div>
-    <div id="tight-games"></div>
-  </div>
-
 </div>
 
-<!-- PREMIOS TAB -->
-<div class="panel" id="tab-premios">
-  <div class="card" style="grid-column:1/-1">
+<!-- GRAFICO -->
+<div class="panel full" id="tab-grafico">
+  <div class="card full">
+    <div class="ch"><span class="ci">📈</span><span class="ct">Evolución de la clasificación por jornada</span></div>
+    <p style="font-size:12px;color:#555;margin-bottom:14px">Posición en la tabla al final de cada jornada (calculado sobre los partidos disponibles)</p>
+    <div class="chart-wrap"><canvas id="rankChart"></canvas></div>
+  </div>
+  <div class="card full">
+    <div class="ch"><span class="ci">📊</span><span class="ct">Puntos acumulados por jornada</span></div>
+    <div class="chart-wrap"><canvas id="ptsChart"></canvas></div>
+  </div>
+</div>
+
+<!-- COMPARADOR -->
+<div class="panel full" id="tab-comparador">
+  <div class="card full">
+    <div class="ch"><span class="ci">🆚</span><span class="ct">Comparador cara a cara</span></div>
+    <div class="cmp-selects">
+      <select class="cmp-select" id="cmp1"></select>
+      <select class="cmp-select" id="cmp2"></select>
+    </div>
+    <div id="cmp-output"></div>
+  </div>
+</div>
+
+<!-- NARRATIVA -->
+<div class="panel full" id="tab-narrative">
+  <div class="card full">
+    <div class="ch"><span class="ci">📰</span><span class="ct">Resumen de temporada</span></div>
+    <div class="narr-summary" id="narr-summary"></div>
+  </div>
+  <div class="card full">
+    <div class="ch"><span class="ci">💥</span><span class="ct">Titulares de la temporada</span></div>
+    <div id="headlines"></div>
+  </div>
+</div>
+
+<!-- PREMIOS -->
+<div class="panel full" id="tab-premios">
+  <div class="card full">
     <div class="ch"><span class="ci">🏅</span><span class="ct">Galería de premios</span></div>
     <div id="awards"></div>
   </div>
 </div>
 
-<div class="footer">Datos de la temporada 2025/26 · Punteirolos 8.0 · GWs 1–37 completos</div>
+<div style="text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid rgba(255,255,255,.05);color:#333;font-size:11px;font-family:'Space Mono',monospace">
+  Punteirolos 8.0 · Temporada 2025/26 · GWs 1–38 completos
+</div>
 </div>
 
 <script>
 const TEAMS = [
-  {e:4529023,n:"Os meninhos",p:"Roi Valcárcel",r:1,w:23,d:0,l:14,pts:2065},
-  {e:231121,n:"Abeledos Team",p:"Camilo Rodríguez",r:2,w:22,d:1,l:14,pts:2168},
-  {e:396351,n:"Liverprol FC",p:"Adrián Prol",r:3,w:21,d:3,l:13,pts:2132},
-  {e:5058364,n:"Aston Vulos",p:"Kepa Sayou",r:4,w:22,d:0,l:15,pts:2074},
-  {e:750815,n:"Rober Bielsa",p:"Rober Bielsa",r:5,w:21,d:1,l:15,pts:2075},
-  {e:3467066,n:"All Blacks",p:"Adrian Vazquez",r:6,w:21,d:0,l:16,pts:2124},
-  {e:203467,n:"Drinks Team",p:"Michi Rodriguez",r:7,w:21,d:0,l:16,pts:2068},
-  {e:4984,n:"The Admin",p:"Alberto Vázquez",r:8,w:20,d:1,l:16,pts:2113},
-  {e:491434,n:"A Penela CF",p:"David Pérez Rodríguez",r:9,w:20,d:1,l:16,pts:2021},
-  {e:769677,n:"UD Torre Pacheco",p:"Figo Dido",r:10,w:19,d:1,l:17,pts:2074},
-  {e:3280431,n:"Figo NO",p:"Marcos Pérez",r:11,w:17,d:3,l:17,pts:2016},
-  {e:682792,n:"La Conchabanza",p:"Rubén Rodríguez",r:12,w:17,d:2,l:18,pts:2130},
-  {e:727697,n:"Chaos FC",p:"Sérgio Méndez",r:13,w:17,d:2,l:18,pts:1911},
-  {e:5011123,n:"Obvelot",p:"Borja Casar",r:14,w:17,d:1,l:19,pts:1959},
-  {e:733119,n:"O Casar",p:"Alex Gonda",r:15,w:17,d:0,l:20,pts:1995},
-  {e:4184519,n:"Cobra Kai",p:"Omar López Parga",r:16,w:16,d:2,l:19,pts:1944},
-  {e:134998,n:"Jouventus de Següín",p:"Jou Vázquez",r:17,w:14,d:0,l:23,pts:1837},
-  {e:3407856,n:"Casas Baratas",p:"Roberto Varela Prada",r:18,w:13,d:2,l:22,pts:1879},
-  {e:2265068,n:"Galaicos",p:"Manuel Vázquez Rodríguez",r:19,w:12,d:0,l:25,pts:1661},
-  {e:512982,n:"Equipo Multiverso",p:"Fran López Mariño",r:20,w:10,d:0,l:27,pts:1832},
+  {e:396351, n:"Liverprol FC",         p:"Adrián Prol",              r:1, w:22,d:3,l:13,pts:2132},
+  {e:4529023,n:"Os meninhos",          p:"Roi Valcárcel",            r:2, w:23,d:0,l:15,pts:2065},
+  {e:231121, n:"Abeledos Team",        p:"Camilo Rodríguez",         r:3, w:22,d:1,l:15,pts:2168},
+  {e:5058364,n:"Aston Vulos",          p:"Kepa Sayou",               r:4, w:22,d:0,l:15,pts:2074},
+  {e:750815, n:"Rober Bielsa",         p:"Rober Bielsa",             r:5, w:21,d:1,l:15,pts:2075},
+  {e:3467066,n:"All Blacks",           p:"Adrian Vazquez",           r:6, w:21,d:0,l:16,pts:2124},
+  {e:203467, n:"Drinks Team",          p:"Michi Rodriguez",          r:7, w:21,d:0,l:16,pts:2068},
+  {e:4984,   n:"The Admin",            p:"Alberto Vázquez",          r:8, w:20,d:1,l:16,pts:2113},
+  {e:491434, n:"A Penela CF",          p:"David Pérez Rodríguez",    r:9, w:20,d:1,l:16,pts:2021},
+  {e:769677, n:"UD Torre Pacheco",     p:"Figo Dido",                r:10,w:19,d:1,l:17,pts:2074},
+  {e:727697, n:"Chaos FC",             p:"Sérgio Méndez",            r:11,w:18,d:2,l:18,pts:1911},
+  {e:3280431,n:"Figo NO",              p:"Marcos Pérez",             r:12,w:17,d:3,l:17,pts:2016},
+  {e:682792, n:"La Conchabanza",       p:"Rubén Rodríguez",          r:13,w:17,d:2,l:18,pts:2130},
+  {e:5011123,n:"Obvelot",              p:"Borja Casar",              r:14,w:17,d:1,l:19,pts:1959},
+  {e:733119, n:"O Casar",              p:"Alex Gonda",               r:15,w:17,d:0,l:20,pts:1995},
+  {e:4184519,n:"Cobra Kai",            p:"Omar López Parga",         r:16,w:16,d:2,l:19,pts:1944},
+  {e:134998, n:"Jouventus de Següín",  p:"Jou Vázquez",              r:17,w:14,d:0,l:23,pts:1837},
+  {e:3407856,n:"Casas Baratas",        p:"Roberto Varela Prada",     r:18,w:13,d:2,l:22,pts:1879},
+  {e:2265068,n:"Galaicos",             p:"Manuel Vázquez Rodríguez", r:19,w:12,d:0,l:25,pts:1661},
+  {e:512982, n:"Equipo Multiverso",    p:"Fran López Mariño",        r:20,w:10,d:0,l:27,pts:1832},
 ];
 
 const MATCHES = [
@@ -267,199 +385,423 @@ const MATCHES = [
   [2265068,42,4529023,81,37],[4984,59,727697,38,37],
 ];
 
+// ── Tab switching ──────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+    this.classList.add('on');
+    document.getElementById('tab-' + this.dataset.tab).classList.add('on');
+    if (this.dataset.tab === 'grafico' && !chartsBuilt) buildCharts();
+    if (this.dataset.tab === 'comparador' && !cmpBuilt) buildComparator();
+  });
+});
+
 // ── Compute stats ──────────────────────────────────────────────
 const st = {};
 TEAMS.forEach(t => {
   st[t.e] = {name:t.n, player:t.p, rank:t.r, wins:t.w, draws:t.d, losses:t.l, pts:t.pts,
-    closeWins:0, bigWins:0, closeLosses:0, highScore:0, lostPts:0, total:0, avg:0};
+    closeWins:0, bigWins:0, closeLosses:0, highScore:0, lostPts:0, total:0,
+    scores:[], gwWins:0, luckWins:0};
 });
 
-let bestScore={name:'',val:0,gw:0}, worstScore={name:'',val:999,gw:0};
+// Build per-team score arrays and match results
+const matchesByGW = {};
+MATCHES.forEach(([e1,s1,e2,s2,gw]) => {
+  if (!matchesByGW[gw]) matchesByGW[gw] = [];
+  matchesByGW[gw].push([e1,s1,e2,s2]);
+});
+
+let bestScoreM={name:'',val:0,gw:0}, worstScoreM={name:'',val:999,gw:0};
 let biggestWin={winner:'',loser:'',diff:0,gw:0,ws:0,ls:0};
-const tightMatches = [];
+const tightMatches=[];
 
 MATCHES.forEach(([e1,s1,e2,s2,gw]) => {
-  const diff = Math.abs(s1-s2);
+  if (s1===0 && s2===0) return; // skip unplayed GW38
+  const diff=Math.abs(s1-s2);
   [[e1,s1,e2,s2],[e2,s2,e1,s1]].forEach(([me,my,them,opp]) => {
     if (!st[me]) return;
     st[me].total++;
-    if (my > st[me].highScore) st[me].highScore = my;
-    if (my > opp) {
-      if (diff <= 4) st[me].closeWins++;
-      if (diff >= 20) st[me].bigWins++;
-    } else if (my < opp) {
-      if (diff <= 4) st[me].closeLosses++;
-      st[me].lostPts += my;
+    st[me].scores.push(my);
+    if (my>st[me].highScore) st[me].highScore=my;
+    if (my>opp) {
+      if (diff<=4) st[me].closeWins++;
+      if (diff>=20) st[me].bigWins++;
+      if (opp>my) st[me].luckWins++; // shouldn't happen but safety
+    } else if (my<opp) {
+      if (diff<=4) st[me].closeLosses++;
+      st[me].lostPts+=my;
+      // luck: opponent won with fewer points? No, track: we lost but scored more... no
     }
+    // Luck: won but scored less than league average that GW
   });
-  // Best/worst
-  const maxS = Math.max(s1,s2), minS = Math.min(s1,s2);
-  const maxN = s1>=s2 ? (st[e1]?.name||'') : (st[e2]?.name||'');
-  const minN = s1<=s2 ? (st[e1]?.name||'') : (st[e2]?.name||'');
-  if (maxS > bestScore.val) bestScore = {name:maxN, val:maxS, gw};
-  if (minS < worstScore.val) worstScore = {name:minN, val:minS, gw};
-  // Biggest win
-  if (diff > biggestWin.diff) {
-    const w = s1>s2 ? (st[e1]?.name||'') : (st[e2]?.name||'');
-    const l = s1>s2 ? (st[e2]?.name||'') : (st[e1]?.name||'');
-    biggestWin = {winner:w, loser:l, diff, gw, ws:Math.max(s1,s2), ls:Math.min(s1,s2)};
+  // Luck index: won but both scored under average of GW
+  const gwAvg=(s1+s2)/2;
+  if (s1>s2 && s1<gwAvg) st[e1].luckWins++;
+  if (s2>s1 && s2<gwAvg) st[e2].luckWins++;
+
+  const maxS=Math.max(s1,s2), minS=Math.min(s1,s2);
+  if (maxS>bestScoreM.val) bestScoreM={name:s1>=s2?(st[e1]?.name||''):(st[e2]?.name||''),val:maxS,gw};
+  if (minS<worstScoreM.val) worstScoreM={name:s1<=s2?(st[e1]?.name||''):(st[e2]?.name||''),val:minS,gw};
+  if (diff>biggestWin.diff){
+    biggestWin={winner:s1>s2?(st[e1]?.name||''):(st[e2]?.name||''),loser:s1>s2?(st[e2]?.name||''):(st[e1]?.name||''),diff,gw,ws:maxS,ls:minS};
   }
-  // Tight
-  if (diff <= 4) tightMatches.push({e1n:st[e1]?.name||'', s1, e2n:st[e2]?.name||'', s2, diff, gw});
+  if (diff<=4) tightMatches.push({e1n:st[e1]?.name||'',s1,e2n:st[e2]?.name||'',s2,diff,gw});
 });
 
+// Std deviation
+function stdDev(arr) {
+  if (!arr.length) return 0;
+  const avg=arr.reduce((a,b)=>a+b,0)/arr.length;
+  return Math.sqrt(arr.reduce((a,b)=>a+(b-avg)**2,0)/arr.length);
+}
 TEAMS.forEach(t => {
-  if (st[t.e].total > 0) st[t.e].avg = (t.pts / st[t.e].total).toFixed(1);
+  st[t.e].std = Math.round(stdDev(st[t.e].scores));
+  st[t.e].avg = st[t.e].total>0?(t.pts/st[t.e].total).toFixed(1):0;
 });
+
+// Streaks
+function computeStreaks() {
+  const results = {}; // entry -> [{gw, result}]
+  TEAMS.forEach(t => { results[t.e]=[]; });
+  const gwsSorted = Object.keys(matchesByGW).map(Number).sort((a,b)=>a-b);
+  gwsSorted.forEach(gw => {
+    matchesByGW[gw].forEach(([e1,s1,e2,s2]) => {
+      if (s1===0&&s2===0) return;
+      results[e1].push(s1>s2?'W':s1<s2?'L':'D');
+      results[e2].push(s2>s1?'W':s2<s1?'L':'D');
+    });
+  });
+  const streaks = {};
+  TEAMS.forEach(t => {
+    const res=results[t.e];
+    let bestW=0,curW=0,bestL=0,curL=0;
+    res.forEach(r=>{
+      if(r==='W'){curW++;bestW=Math.max(bestW,curW);curL=0}
+      else if(r==='L'){curL++;bestL=Math.max(bestL,curL);curW=0}
+      else{curW=0;curL=0}
+    });
+    streaks[t.e]={bestW,bestL,results:res};
+  });
+  return streaks;
+}
+const STREAKS=computeStreaks();
 
 // ── Render helpers ─────────────────────────────────────────────
-function bar(name, val, max, color, sub='') {
-  const pct = Math.min((val/max)*100, 100);
-  return `<div class="br">
+function bar(name, val, max, color, sub='', delay=0) {
+  const pct=Math.min((parseFloat(val)/Math.max(parseFloat(max),1))*100,100);
+  return `<div class="br" style="animation-delay:${delay}ms">
     <div class="brt"><span class="brl" title="${name}">${name}</span>
     <div><span class="brv" style="color:${color}">${val}</span>${sub?`<span class="brs">${sub}</span>`:''}</div></div>
     <div class="trk"><div class="fil" style="width:${pct}%;background:${color}"></div></div>
   </div>`;
 }
-
-function sortedBy(key, asc=false) {
-  return [...TEAMS].sort((a,b) => asc ? st[a.e][key]-st[b.e][key] : st[b.e][key]-st[a.e][key]);
+function sortedBy(key,asc=false){
+  return [...TEAMS].sort((a,b)=>asc?parseFloat(st[a.e][key])-parseFloat(st[b.e][key]):parseFloat(st[b.e][key])-parseFloat(st[a.e][key]));
 }
 
-// ── Standings ──────────────────────────────────────────────────
-const medals = ['#ffd700','#c0c0c0','#cd7f32'];
-document.getElementById('standings').innerHTML = TEAMS.map((t,i) => `
+// ── PODIUM ─────────────────────────────────────────────────────
+const podColors=['#ffd700','#c0c0c0','#cd7f32'];
+const podClass=['pod-1','pod-2','pod-3'];
+document.getElementById('podium').innerHTML=TEAMS.slice(0,3).map((t,i)=>`
+  <div class="pod ${podClass[i]}">
+    <div class="pod-medal">${['🥇','🥈','🥉'][i]}</div>
+    <div class="pod-name">${t.n}</div>
+    <div class="pod-player">${t.p}</div>
+    <div class="pod-pts" style="color:${podColors[i]}">${t.pts}</div>
+    <div class="pod-rec">${t.w}V ${t.d}E ${t.l}D</div>
+  </div>`).join('');
+
+// ── STANDINGS (4th+) ───────────────────────────────────────────
+document.getElementById('standings').innerHTML=TEAMS.slice(3).map((t,i)=>`
   <div class="sr">
-    <div class="spos" style="background:${medals[i]||'rgba(255,255,255,.08)'};color:${i<3?'#000':'#777'}">${i+1}</div>
+    <div class="spos">${i+4}</div>
     <span class="snm" title="${t.n}">${t.n}</span>
     <span class="srec"><span style="color:#4ade80">${t.w}V</span> <span style="color:#facc15">${t.d}E</span> <span style="color:#f87171">${t.l}D</span></span>
     <span class="spt">${t.pts}</span>
   </div>`).join('');
 
-// ── Close wins ─────────────────────────────────────────────────
-const cwMax = Math.max(...TEAMS.map(t=>st[t.e].closeWins),1);
-document.getElementById('close-wins').innerHTML = sortedBy('closeWins').map(t=>
-  bar(t.n, st[t.e].closeWins, cwMax, '#facc15', 'partidos')).join('');
+// ── H2H bars ──────────────────────────────────────────────────
+const cwMax=Math.max(...TEAMS.map(t=>st[t.e].closeWins),1);
+document.getElementById('close-wins').innerHTML=sortedBy('closeWins').map((t,i)=>bar(t.n,st[t.e].closeWins,cwMax,'#facc15','partidos',i*40)).join('');
+const bwMax=Math.max(...TEAMS.map(t=>st[t.e].bigWins),1);
+document.getElementById('big-wins').innerHTML=sortedBy('bigWins').map((t,i)=>bar(t.n,st[t.e].bigWins,bwMax,'#37f0a0','palizas',i*40)).join('');
+const clMax=Math.max(...TEAMS.map(t=>st[t.e].closeLosses),1);
+document.getElementById('close-losses').innerHTML=sortedBy('closeLosses').map((t,i)=>bar(t.n,st[t.e].closeLosses,clMax,'#f87171','partidos',i*40)).join('');
 
-// ── Big wins ───────────────────────────────────────────────────
-const bwMax = Math.max(...TEAMS.map(t=>st[t.e].bigWins),1);
-document.getElementById('big-wins').innerHTML = sortedBy('bigWins').map(t=>
-  bar(t.n, st[t.e].bigWins, bwMax, '#37f0a0', 'palizas')).join('');
+// ── PUNTOS bars ───────────────────────────────────────────────
+const ptMax=Math.max(...TEAMS.map(t=>t.pts));
+document.getElementById('total-pts').innerHTML=sortedBy('pts').map((t,i)=>bar(t.n,t.pts,ptMax,'#5b8fff','pts',i*35)).join('');
+const hsMax=Math.max(...TEAMS.map(t=>st[t.e].highScore),1);
+document.getElementById('high-score').innerHTML=sortedBy('highScore').map((t,i)=>bar(t.n,st[t.e].highScore,hsMax,'#37f0a0','pts',i*35)).join('');
+const avMax=Math.max(...TEAMS.map(t=>parseFloat(st[t.e].avg)),1);
+document.getElementById('avg-score').innerHTML=[...TEAMS].sort((a,b)=>parseFloat(st[b.e].avg)-parseFloat(st[a.e].avg)).map((t,i)=>bar(t.n,st[t.e].avg,avMax,'#a78bfa','pts/GW',i*35)).join('');
+document.getElementById('records').innerHTML=`
+  <div class="rb gr"><div class="rl" style="color:var(--g)">🏅 Mayor puntuación</div><div class="rs" style="color:var(--g)">${bestScoreM.val} pts</div><div class="rm">${bestScoreM.name} · GW ${bestScoreM.gw}</div></div>
+  <div class="rb rd"><div class="rl" style="color:var(--r)">😬 Menor puntuación</div><div class="rs" style="color:var(--r)">${worstScoreM.val} pts</div><div class="rm">${worstScoreM.name} · GW ${worstScoreM.gw}</div></div>
+  <div class="rb bl"><div class="rl" style="color:var(--b)">💥 Victoria más amplia</div><div class="rs" style="color:var(--b)">+${biggestWin.diff} pts</div><div class="rm">${biggestWin.winner} vs ${biggestWin.loser} · GW${biggestWin.gw}</div></div>
+  <div class="rb yl"><div class="rl" style="color:var(--y)">🤝 Partidos igualados (≤4 pts)</div><div class="rs" style="color:var(--y)">${tightMatches.length}</div><div class="rm">de ${MATCHES.filter(m=>m[1]+m[3]>0).length} partidos jugados</div></div>`;
 
-// ── Close losses ───────────────────────────────────────────────
-const clMax = Math.max(...TEAMS.map(t=>st[t.e].closeLosses),1);
-document.getElementById('close-losses').innerHTML = sortedBy('closeLosses').map(t=>
-  bar(t.n, st[t.e].closeLosses, clMax, '#f87171', 'partidos')).join('');
+// ── AVANZADO ──────────────────────────────────────────────────
+// Rachas
+const streakDataW=[...TEAMS].sort((a,b)=>STREAKS[b.e].bestW-STREAKS[a.e].bestW);
+document.getElementById('best-streak').innerHTML=streakDataW.slice(0,10).map((t,i)=>`
+  <div class="racha-row">
+    <span class="racha-name">${t.n}</span>
+    <span class="racha-badge win">🔥 ${STREAKS[t.e].bestW} seguidas</span>
+  </div>`).join('');
 
-// ── Total pts ─────────────────────────────────────────────────
-const ptMax = Math.max(...TEAMS.map(t=>t.pts));
-document.getElementById('total-pts').innerHTML = sortedBy('pts').map(t=>
-  bar(t.n, t.pts, ptMax, '#5b8fff', 'pts')).join('');
+const streakDataL=[...TEAMS].sort((a,b)=>STREAKS[b.e].bestL-STREAKS[a.e].bestL);
+document.getElementById('worst-streak').innerHTML=streakDataL.slice(0,10).map((t,i)=>`
+  <div class="racha-row">
+    <span class="racha-name">${t.n}</span>
+    <span class="racha-badge lose">💀 ${STREAKS[t.e].bestL} seguidas</span>
+  </div>`).join('');
 
-// ── High score ────────────────────────────────────────────────
-const hsMax = Math.max(...TEAMS.map(t=>st[t.e].highScore),1);
-document.getElementById('high-score').innerHTML = sortedBy('highScore').map(t=>
-  bar(t.n, st[t.e].highScore, hsMax, '#37f0a0', 'pts')).join('');
-
-// ── Avg score ─────────────────────────────────────────────────
-const avMax = Math.max(...TEAMS.map(t=>parseFloat(st[t.e].avg)),1);
-document.getElementById('avg-score').innerHTML = [...TEAMS].sort((a,b)=>parseFloat(st[b.e].avg)-parseFloat(st[a.e].avg)).map(t=>
-  bar(t.n, st[t.e].avg, avMax, '#a78bfa', 'pts/GW')).join('');
-
-// ── Records ───────────────────────────────────────────────────
-document.getElementById('records').innerHTML = `
-  <div class="rb gr">
-    <div class="rl" style="color:var(--g)">🏅 Mayor puntuación en una jornada</div>
-    <div class="rs" style="color:var(--g)">${bestScore.val} pts</div>
-    <div class="rm">${bestScore.name} · GW ${bestScore.gw}</div>
-  </div>
-  <div class="rb rd">
-    <div class="rl" style="color:var(--r)">😬 Menor puntuación en una jornada</div>
-    <div class="rs" style="color:var(--r)">${worstScore.val} pts</div>
-    <div class="rm">${worstScore.name} · GW ${worstScore.gw}</div>
-  </div>`;
-
-// ── Win % ────────────────────────────────────────────────────
-const wpArr = [...TEAMS].sort((a,b) => {
-  const wa = a.w/(a.w+a.d+a.l), wb = b.w/(b.w+b.d+b.l);
-  return wb - wa;
-});
-document.getElementById('win-pct').innerHTML = wpArr.map((t,i) => {
-  const pct = Math.round(t.w/(t.w+t.d+t.l)*100);
-  return bar(t.n, pct+'%', 100, i===0?'#37f0a0':'#5b8fff');
+// Win %
+const wpArr=[...TEAMS].sort((a,b)=>(b.w/(b.w+b.d+b.l))-(a.w/(a.w+a.d+a.l)));
+document.getElementById('win-pct').innerHTML=wpArr.map((t,i)=>{
+  const pct=Math.round(t.w/(t.w+t.d+t.l)*100);
+  return bar(t.n,pct+'%',100,i===0?'#37f0a0':'#5b8fff','',i*35);
 }).join('');
 
-// ── Unlucky ───────────────────────────────────────────────────
-const ulMax = Math.max(...TEAMS.map(t=>st[t.e].lostPts),1);
-document.getElementById('unlucky').innerHTML = sortedBy('lostPts').slice(0,10).map(t=>
-  bar(t.n, st[t.e].lostPts, ulMax, '#fb923c', 'pts en derrotas')).join('');
+// Chaos (highest std dev)
+const chaosArr=[...TEAMS].sort((a,b)=>st[b.e].std-st[a.e].std);
+const stdMax=Math.max(...TEAMS.map(t=>st[t.e].std),1);
+document.getElementById('chaos').innerHTML=chaosArr.slice(0,10).map((t,i)=>bar(t.n,st[t.e].std,stdMax,'#fb923c','σ',i*35)).join('');
 
-// ── Biggest win ───────────────────────────────────────────────
-document.getElementById('biggest-win').innerHTML = `
-  <div class="rb" style="background:rgba(55,240,160,.05);border:1px solid rgba(55,240,160,.12);margin-bottom:14px">
-    <div class="rl" style="color:var(--g)">💥 Victoria más amplia de la temporada</div>
-    <div class="rs" style="color:var(--g)">+${biggestWin.diff} pts · GW ${biggestWin.gw}</div>
-    <div class="rm">${biggestWin.winner} <span style="color:#37f0a0">${biggestWin.ws}</span> — <span style="color:#f87171">${biggestWin.ls}</span> ${biggestWin.loser}</div>
-  </div>
-  <p style="font-size:12px;color:#555;margin-bottom:10px">Top victorias más amplias:</p>
-  ${[...MATCHES].sort((a,b)=>Math.abs(b[1]-b[3])-Math.abs(a[1]-a[3])).slice(0,5).map(([e1,s1,e2,s2,gw])=>{
-    const diff=Math.abs(s1-s2);
-    const wn=s1>s2?(st[e1]?.name||''):(st[e2]?.name||'');
-    const ln=s1>s2?(st[e2]?.name||''):(st[e1]?.name||'');
-    const ws=Math.max(s1,s2), ls=Math.min(s1,s2);
-    return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px">
-      <span style="color:#dde">${wn} vs ${ln}</span>
-      <span style="font-family:'Space Mono',monospace;color:#37f0a0">+${diff} (GW${gw})</span>
+// Consistent (lowest std dev, min 10 games)
+const consistArr=[...TEAMS].filter(t=>st[t.e].total>=10).sort((a,b)=>st[a.e].std-st[b.e].std);
+const stdMin=Math.max(...consistArr.map(t=>st[t.e].std),1);
+document.getElementById('consistent').innerHTML=consistArr.slice(0,10).map((t,i)=>bar(t.n,st[t.e].std,stdMin,'#37f0a0','σ',i*35)).join('');
+
+// Luck index
+const luckArr=[...TEAMS].sort((a,b)=>st[b.e].luckWins-st[a.e].luckWins);
+const luckMax=Math.max(...TEAMS.map(t=>st[t.e].luckWins),1);
+document.getElementById('luck').innerHTML=luckArr.slice(0,10).map((t,i)=>bar(t.n,st[t.e].luckWins,luckMax,'#a78bfa','victorias con suerte',i*35)).join('');
+
+// Power ranking (avg score)
+document.getElementById('power').innerHTML=[...TEAMS].sort((a,b)=>parseFloat(st[b.e].avg)-parseFloat(st[a.e].avg)).map((t,i)=>bar(t.n,st[t.e].avg,avMax,'#5b8fff','pts/GW',i*35)).join('');
+
+// Unlucky
+const ulMax=Math.max(...TEAMS.map(t=>st[t.e].lostPts),1);
+document.getElementById('unlucky').innerHTML=sortedBy('lostPts').slice(0,10).map((t,i)=>bar(t.n,st[t.e].lostPts,ulMax,'#fb923c','pts en derrotas',i*35)).join('');
+
+// ── CHARTS ────────────────────────────────────────────────────
+let chartsBuilt=false;
+function buildCharts(){
+  chartsBuilt=true;
+  const gwsSorted=Object.keys(matchesByGW).map(Number).filter(g=>{
+    const ms=matchesByGW[g];
+    return ms.some(m=>m[1]+m[3]>0);
+  }).sort((a,b)=>a-b);
+
+  // Accumulate cumulative pts per team per GW
+  const cumPts={};
+  TEAMS.forEach(t=>{cumPts[t.e]=[];});
+  const runningPts={};
+  TEAMS.forEach(t=>{runningPts[t.e]=0;});
+
+  gwsSorted.forEach(gw=>{
+    (matchesByGW[gw]||[]).forEach(([e1,s1,e2,s2])=>{
+      if(s1===0&&s2===0)return;
+      runningPts[e1]=(runningPts[e1]||0)+s1;
+      runningPts[e2]=(runningPts[e2]||0)+s2;
+    });
+    TEAMS.forEach(t=>{cumPts[t.e].push(runningPts[t.e]||0);});
+  });
+
+  // Rank per GW based on cumulative pts
+  const rankByGW={};
+  TEAMS.forEach(t=>{rankByGW[t.e]=[];});
+  gwsSorted.forEach((gw,gi)=>{
+    const snap=TEAMS.map(t=>({e:t.e,pts:cumPts[t.e][gi]||0})).sort((a,b)=>b.pts-a.pts);
+    snap.forEach((s,ri)=>{rankByGW[s.e].push(ri+1);});
+  });
+
+  const palette=['#37f0a0','#5b8fff','#f87171','#facc15','#a78bfa','#fb923c','#34d399','#60a5fa','#f472b6','#fbbf24','#818cf8','#4ade80','#c084fc','#fb7185','#38bdf8','#a3e635','#fdba74','#67e8f9','#d946ef','#10b981'];
+  const labels=gwsSorted.map(g=>`GW${g}`);
+
+  // Rank chart (top 8 teams for readability)
+  const top8=TEAMS.slice(0,8);
+  new Chart(document.getElementById('rankChart'),{
+    type:'line',
+    data:{
+      labels,
+      datasets:top8.map((t,i)=>({
+        label:t.n,data:rankByGW[t.e],borderColor:palette[i],backgroundColor:'transparent',
+        borderWidth:2,pointRadius:1.5,tension:.35
+      }))
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      scales:{
+        y:{reverse:true,min:1,max:20,ticks:{color:'#555',stepSize:2},grid:{color:'rgba(255,255,255,.04)'},title:{display:true,text:'Posición',color:'#555'}},
+        x:{ticks:{color:'#555',maxTicksLimit:12,maxRotation:0},grid:{color:'rgba(255,255,255,.04)'}}
+      },
+      plugins:{legend:{labels:{color:'#888',font:{size:10},boxWidth:12}}}
+    }
+  });
+
+  // Cumulative pts chart (top 6)
+  const top6=TEAMS.slice(0,6);
+  new Chart(document.getElementById('ptsChart'),{
+    type:'line',
+    data:{
+      labels,
+      datasets:top6.map((t,i)=>({
+        label:t.n,data:cumPts[t.e],borderColor:palette[i],backgroundColor:palette[i]+'18',
+        borderWidth:2,pointRadius:1.5,tension:.35,fill:false
+      }))
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      scales:{
+        y:{ticks:{color:'#555'},grid:{color:'rgba(255,255,255,.04)'},title:{display:true,text:'Puntos acumulados',color:'#555'}},
+        x:{ticks:{color:'#555',maxTicksLimit:12,maxRotation:0},grid:{color:'rgba(255,255,255,.04)'}}
+      },
+      plugins:{legend:{labels:{color:'#888',font:{size:10},boxWidth:12}}}
+    }
+  });
+}
+
+// ── COMPARADOR ────────────────────────────────────────────────
+let cmpBuilt=false;
+function buildComparator(){
+  cmpBuilt=true;
+  ['cmp1','cmp2'].forEach((id,idx)=>{
+    const sel=document.getElementById(id);
+    sel.innerHTML=TEAMS.map((t,i)=>`<option value="${t.e}" ${i===idx?'selected':''}>${t.n}</option>`).join('');
+  });
+  renderComparison();
+  document.getElementById('cmp1').addEventListener('change',renderComparison);
+  document.getElementById('cmp2').addEventListener('change',renderComparison);
+}
+
+function renderComparison(){
+  const e1=parseInt(document.getElementById('cmp1').value);
+  const e2=parseInt(document.getElementById('cmp2').value);
+  const t1=TEAMS.find(t=>t.e===e1), t2=TEAMS.find(t=>t.e===e2);
+  if(!t1||!t2||e1===e2){
+    document.getElementById('cmp-output').innerHTML='<p style="color:#555;text-align:center;padding:20px">Selecciona dos equipos distintos</p>';
+    return;
+  }
+  const s1=st[e1], s2=st[e2];
+  // H2H direct matches
+  const h2hMatches=MATCHES.filter(m=>(m[1]+m[3]>0)&&((m[0]===e1&&m[2]===e2)||(m[0]===e2&&m[2]===e1)));
+  let h2wE1=0,h2wE2=0,h2d=0;
+  h2hMatches.forEach(([a,sa,b,sb])=>{
+    if(a===e1){sa>sb?h2wE1++:sb>sa?h2wE2++:h2d++;}
+    else{sb>sa?h2wE1++:sa>sb?h2wE2++:h2d++;}
+  });
+
+  function cmpRow(label,v1,v2,higherBetter=true){
+    const w1=(higherBetter?parseFloat(v1)>parseFloat(v2):parseFloat(v1)<parseFloat(v2));
+    const w2=(higherBetter?parseFloat(v2)>parseFloat(v1):parseFloat(v2)<parseFloat(v1));
+    return `<div class="cmp-result">
+      <div class="cmp-val ${w1?'win':parseFloat(v1)===parseFloat(v2)?'':'lose'}" style="text-align:right">${v1}</div>
+      <div class="cmp-stat-name">${label}</div>
+      <div class="cmp-val ${w2?'win':parseFloat(v1)===parseFloat(v2)?'':'lose'}">${v2}</div>
     </div>`;
-  }).join('')}`;
+  }
 
-// ── Tight games ───────────────────────────────────────────────
-const sorted_tight = [...tightMatches].sort((a,b)=>a.diff-b.diff);
-document.getElementById('tight-games').innerHTML = `
-  <p style="font-size:12px;color:#555;margin-bottom:10px;word-break:break-word">${tightMatches.length} partidos decididos por ≤4 puntos</p>
-  ${sorted_tight.slice(0,8).map(m=>`
-  <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px">
-    <span style="color:#dde;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.e1n} <span style="color:#37f0a0">${m.s1}</span>–<span style="color:#f87171">${m.s2}</span> ${m.e2n}</span>
-    <span style="font-family:'Space Mono',monospace;color:#facc15">±${m.diff} GW${m.gw}</span>
-  </div>`).join('')}`;
+  document.getElementById('cmp-output').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;margin-bottom:16px;padding:12px;background:rgba(255,255,255,.03);border-radius:12px">
+      <div style="text-align:right"><div style="font-weight:700;color:#eee;font-size:14px">${t1.n}</div><div style="font-size:11px;color:#555">${t1.p}</div></div>
+      <div style="text-align:center;font-size:20px;align-self:center">🆚</div>
+      <div><div style="font-weight:700;color:#eee;font-size:14px">${t2.n}</div><div style="font-size:11px;color:#555">${t2.p}</div></div>
+    </div>
+    ${cmpRow('Pos. final',t1.r,t2.r,false)}
+    ${cmpRow('Victorias',t1.w,t2.w)}
+    ${cmpRow('Empates',t1.d,t2.d)}
+    ${cmpRow('Derrotas',t1.l,t2.l,false)}
+    ${cmpRow('Puntos totales',t1.pts,t2.pts)}
+    ${cmpRow('Promedio pts/GW',s1.avg,s2.avg)}
+    ${cmpRow('Mayor puntuación',s1.highScore,s2.highScore)}
+    ${cmpRow('Consistencia (σ)',s1.std,s2.std,false)}
+    ${cmpRow('Victorias ajustadas',s1.closeWins,s2.closeWins)}
+    ${cmpRow('Goleadas (+20)',s1.bigWins,s2.bigWins)}
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.07)">
+      <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;font-family:'Space Mono',monospace">Enfrentamientos directos (${h2hMatches.length})</div>
+      <div style="display:flex;justify-content:center;align-items:center;gap:20px;margin-bottom:12px">
+        <span style="font-size:24px;font-weight:800;font-family:'Space Mono',monospace;color:${h2wE1>h2wE2?'#37f0a0':h2wE1<h2wE2?'#f87171':'#facc15'}">${h2wE1}</span>
+        <span style="font-size:12px;color:#555">–</span>
+        <span style="font-size:24px;font-weight:800;font-family:'Space Mono',monospace;color:${h2wE2>h2wE1?'#37f0a0':h2wE2<h2wE1?'#f87171':'#facc15'}">${h2wE2}</span>
+      </div>
+      ${h2hMatches.map(([a,sa,b,sb,gw])=>{
+        const myS=a===e1?sa:sb, oppS=a===e1?sb:sa;
+        const res=myS>oppS?'🟢':myS<oppS?'🔴':'🟡';
+        return `<div class="h2h-match">
+          <span style="color:#888">GW${gw}</span>
+          <span>${res} <span style="color:#dde;font-weight:600">${t1.n}</span> <span style="font-family:'Space Mono',monospace;color:${myS>oppS?'#37f0a0':myS<oppS?'#f87171':'#facc15'}">${myS}–${oppS}</span> <span style="color:#dde">${t2.n}</span></span>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
 
-// ── Awards ───────────────────────────────────────────────────
-const sorted_cw = sortedBy('closeWins');
-const sorted_bw = sortedBy('bigWins');
-const sorted_cl = sortedBy('closeLosses');
-const sorted_hs = sortedBy('highScore');
-const sorted_ul = sortedBy('lostPts');
-const sorted_av = [...TEAMS].sort((a,b)=>parseFloat(st[b.e].avg)-parseFloat(st[a.e].avg));
+// ── NARRATIVA ────────────────────────────────────────────────
+const champion=TEAMS[0], last=TEAMS[19];
+const topScorer=[...TEAMS].sort((a,b)=>b.pts-a.pts)[0];
+const mostChaos=[...TEAMS].sort((a,b)=>st[b.e].std-st[a.e].std)[0];
+const mostConsist=[...TEAMS].filter(t=>st[t.e].total>=10).sort((a,b)=>st[a.e].std-st[b.e].std)[0];
+const mostLuck=[...TEAMS].sort((a,b)=>st[b.e].luckWins-st[a.e].luckWins)[0];
+const mostClose=[...TEAMS].sort((a,b)=>st[b.e].closeWins-st[a.e].closeWins)[0];
+const biggestStreak=[...TEAMS].sort((a,b)=>STREAKS[b.e].bestW-STREAKS[a.e].bestW)[0];
+const worstStreak=[...TEAMS].sort((a,b)=>STREAKS[b.e].bestL-STREAKS[a.e].bestL)[0];
 
-const awards = [
-  {i:'🥇', l:'Campeón de la liga', v:TEAMS[0].n, sub:`${TEAMS[0].w}V ${TEAMS[0].d}E ${TEAMS[0].l}D · ${TEAMS[0].pts} pts`},
-  {i:'💀', l:'Farolillo rojo', v:TEAMS[19].n, sub:`${TEAMS[19].w}V ${TEAMS[19].d}E ${TEAMS[19].l}D · ${TEAMS[19].pts} pts`},
-  {i:'😰', l:'Rey del susto (más victorias ajustadas)', v:sorted_cw[0].n, sub:`${st[sorted_cw[0].e].closeWins} victorias por ≤4 pts`},
-  {i:'💥', l:'Rey de las palizas', v:sorted_bw[0].n, sub:`${st[sorted_bw[0].e].bigWins} victorias por +20 pts`},
-  {i:'💔', l:'El más desafortunado (más derrotas ajustadas)', v:sorted_cl[0].n, sub:`${st[sorted_cl[0].e].closeLosses} derrotas por ≤4 pts`},
-  {i:'🎯', l:'Mayor puntuación en una sola jornada', v:sorted_hs[0].n, sub:`${st[sorted_hs[0].e].highScore} pts`},
-  {i:'🏅', l:'Mejor promedio de puntos por jornada', v:sorted_av[0].n, sub:`${st[sorted_av[0].e].avg} pts/GW`},
-  {i:'😵', l:'El más gafado (más pts en derrotas)', v:sorted_ul[0].n, sub:`${st[sorted_ul[0].e].lostPts} pts acumulados perdiendo`},
-  {i:'⚡', l:'Victoria más amplia de la temporada', v:biggestWin.winner, sub:`+${biggestWin.diff} pts vs ${biggestWin.loser} (GW${biggestWin.gw})`},
-  {i:'📊', l:'Mayor acumulado de puntos', v:[...TEAMS].sort((a,b)=>b.pts-a.pts)[0].n, sub:`${[...TEAMS].sort((a,b)=>b.pts-a.pts)[0].pts} pts totales`},
+document.getElementById('narr-summary').innerHTML=`
+  <p><strong>${champion.n}</strong> se proclamó campeón de la Punteirolos 8.0 con ${champion.pts} puntos y un balance de ${champion.w} victorias, ${champion.d} empates y ${champion.l} derrotas. Una temporada de regularidad que le llevó a lo más alto.</p>
+  <p>El mayor acumulador de puntos fue <strong>${topScorer.n}</strong> con ${topScorer.pts} pts en total, demostrando que el fantasy premia la constancia semana a semana. El promedio más alto lo tuvo <strong>${[...TEAMS].sort((a,b)=>parseFloat(st[b.e].avg)-parseFloat(st[a.e].avg))[0].n}</strong> con ${[...TEAMS].sort((a,b)=>parseFloat(st[b.e].avg)-parseFloat(st[a.e].avg))[0].pts/[...TEAMS].sort((a,b)=>parseFloat(st[b.e].avg)-parseFloat(st[a.e].avg))[0].w>0?st[[...TEAMS].sort((a,b)=>parseFloat(st[b.e].avg)-parseFloat(st[a.e].avg))[0].e].avg:'-'} pts/GW.</p>
+  <p><strong>${mostChaos.n}</strong> fue el equipo más impredecible de la liga (σ=${st[mostChaos.e].std} pts), capaz de todo en cualquier jornada. En el extremo opuesto, <strong>${mostConsist.n}</strong> fue el más regular y consistente (σ=${st[mostConsist.e].std} pts).</p>
+  <p><strong>${mostClose.n}</strong> fue el rey del susto con ${st[mostClose.e].closeWins} victorias decididas por 4 puntos o menos. <strong>${biggestStreak.n}</strong> tuvo la mejor racha de la temporada con ${STREAKS[biggestStreak.e].bestW} victorias consecutivas.</p>
+  <p><strong>${last.n}</strong> cerró la tabla con ${last.pts} puntos y ${last.w} victorias, aunque la liga es larga y cualquier cosa puede pasar la próxima temporada.</p>`;
+
+// Headlines
+const topMatch=MATCHES.filter(m=>m[1]+m[3]>0).sort((a,b)=>Math.max(b[1],b[3])-Math.max(a[1],a[3]))[0];
+const closestM=[...tightMatches].sort((a,b)=>a.diff-b.diff)[0];
+const headline_data=[
+  {e:'💥', t:`Masacre de la temporada: <strong>${biggestWin.winner} ${biggestWin.ws}–${biggestWin.ls} ${biggestWin.loser}</strong> en GW${biggestWin.gw}, una paliza de +${biggestWin.diff} puntos que quedará en los libros.`},
+  {e:'🎯', t:`Jornada histórica: <strong>${bestScoreM.name}</strong> alcanzó ${bestScoreM.val} puntos en la GW${bestScoreM.gw}, la puntuación más alta de toda la temporada.`},
+  {e:'😬', t:`Catástrofe: <strong>${worstScoreM.name}</strong> marcó solo ${worstScoreM.val} puntos en la GW${worstScoreM.gw}. Algunos fines de semana son mejores que otros.`},
+  {e:'😰', t:`El partido más igualado: <strong>${closestM?.e1n}</strong> ${closestM?.s1}–${closestM?.s2} <strong>${closestM?.e2n}</strong> en GW${closestM?.gw}. Solo ${closestM?.diff} punto de diferencia.`},
+  {e:'🔥', t:`Mejor racha: <strong>${biggestStreak.n}</strong> encadenó ${STREAKS[biggestStreak.e].bestW} victorias consecutivas, la racha más larga de la temporada.`},
+  {e:'💀', t:`Peor pesadilla: <strong>${worstStreak.n}</strong> sufrió una racha de ${STREAKS[worstStreak.e].bestL} derrotas seguidas. El fantasy puede ser muy cruel.`},
+  {e:'🍀', t:`El más afortunado: <strong>${mostLuck.n}</strong> ganó ${st[mostLuck.e].luckWins} partidos puntuando por debajo de la media de esa jornada. La suerte también juega.`},
+  {e:'📊', t:`${tightMatches.length} de los ${MATCHES.filter(m=>m[1]+m[3]>0).length} partidos jugados se decidieron por ≤4 puntos. Esta liga nunca aburre.`},
 ];
-document.getElementById('awards').innerHTML = awards.map(a=>`
+document.getElementById('headlines').innerHTML=headline_data.map(h=>`
+  <div class="headline" style="border-left-color:${['#37f0a0','#5b8fff','#f87171','#facc15','#fb923c','#a78bfa','#a78bfa','#37f0a0'][headline_data.indexOf(h)]}">
+    <span class="hl-emoji">${h.e}</span><span class="hl-text">${h.t}</span>
+  </div>`).join('');
+
+// ── PREMIOS ───────────────────────────────────────────────────
+const awards=[
+  {i:'🥇',l:'Campeón de la liga',v:champion.n,s:`${champion.w}V ${champion.d}E ${champion.l}D · ${champion.pts} pts`},
+  {i:'💀',l:'Farolillo rojo',v:last.n,s:`${last.w}V ${last.d}E ${last.l}D · ${last.pts} pts`},
+  {i:'📊',l:'Mayor acumulado de puntos',v:topScorer.n,s:`${topScorer.pts} pts totales`},
+  {i:'🏅',l:'Mejor promedio por jornada',v:[...TEAMS].sort((a,b)=>parseFloat(st[b.e].avg)-parseFloat(st[a.e].avg))[0].n,s:`${[...TEAMS].sort((a,b)=>parseFloat(st[b.e].avg)-parseFloat(st[a.e].avg))[0]&&st[[...TEAMS].sort((a,b)=>parseFloat(st[b.e].avg)-parseFloat(st[a.e].avg))[0].e].avg} pts/GW`},
+  {i:'😰',l:'Rey del susto (más victorias ≤4 pts)',v:mostClose.n,s:`${st[mostClose.e].closeWins} victorias ajustadas`},
+  {i:'💥',l:'Rey de las palizas (+20 pts)',v:sortedBy('bigWins')[0].n,s:`${st[sortedBy('bigWins')[0].e].bigWins} goleadas`},
+  {i:'💔',l:'El más desafortunado (más derrotas ≤4 pts)',v:sortedBy('closeLosses')[0].n,s:`${st[sortedBy('closeLosses')[0].e].closeLosses} derrotas ajustadas`},
+  {i:'🎯',l:'Mayor puntuación en una sola jornada',v:sortedBy('highScore')[0].n,s:`${st[sortedBy('highScore')[0].e].highScore} pts · GW${bestScoreM.gw}`},
+  {i:'🔥',l:'Mejor racha de victorias',v:biggestStreak.n,s:`${STREAKS[biggestStreak.e].bestW} victorias consecutivas`},
+  {i:'❄️',l:'Peor racha de derrotas',v:worstStreak.n,s:`${STREAKS[worstStreak.e].bestL} derrotas consecutivas`},
+  {i:'🌪️',l:'Equipo más caótico (mayor σ)',v:mostChaos.n,s:`Desviación típica: ${st[mostChaos.e].std} pts`},
+  {i:'🎯',l:'Equipo más consistente (menor σ)',v:mostConsist.n,s:`Desviación típica: ${st[mostConsist.e].std} pts`},
+  {i:'🍀',l:'El más afortunado',v:mostLuck.n,s:`${st[mostLuck.e].luckWins} victorias con suerte`},
+  {i:'😵',l:'El más gafado (más pts en derrotas)',v:sortedBy('lostPts')[0].n,s:`${st[sortedBy('lostPts')[0].e].lostPts} pts marcados perdiendo`},
+  {i:'⚡',l:'Victoria más amplia de la temporada',v:biggestWin.winner,s:`+${biggestWin.diff} pts vs ${biggestWin.loser} · GW${biggestWin.gw}`},
+];
+document.getElementById('awards').innerHTML=awards.map(a=>`
   <div class="ar">
     <span class="ai">${a.i}</span>
-    <div style="flex:1">
+    <div style="flex:1;min-width:0">
       <div class="al">${a.l}</div>
       <div class="av">${a.v}</div>
-      <div style="font-size:11px;color:#555;margin-top:1px">${a.sub}</div>
+      <div class="asub">${a.s}</div>
     </div>
   </div>`).join('');
 
-// ── Tab switching ─────────────────────────────────────────────
-function showTab(id) {
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
-  document.getElementById('tab-'+id).classList.add('on');
-  event.target.classList.add('on');
-}
 </script>
 </body>
 </html>
